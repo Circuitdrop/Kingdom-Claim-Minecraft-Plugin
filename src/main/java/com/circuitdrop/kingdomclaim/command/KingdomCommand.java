@@ -4,6 +4,7 @@ import com.circuitdrop.kingdomclaim.KingdomClaimPlugin;
 import com.circuitdrop.kingdomclaim.gui.MainMenuGui;
 import com.circuitdrop.kingdomclaim.manager.KingdomManager;
 import com.circuitdrop.kingdomclaim.manager.PlayerDataManager;
+import com.circuitdrop.kingdomclaim.manager.WarManager;
 import com.circuitdrop.kingdomclaim.model.ClaimChunk;
 import com.circuitdrop.kingdomclaim.model.Kingdom;
 import com.circuitdrop.kingdomclaim.model.Rank;
@@ -37,16 +38,18 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
     private static final List<String> SUBCOMMANDS = List.of(
             "create", "disband", "invite", "accept", "deny", "invites", "leave", "kick",
             "promote", "demote", "transfer", "claim", "unclaim", "map", "visualize", "gui",
-            "relation", "chat", "sethome", "home", "info", "list", "admin", "help");
+            "relation", "declarewar", "chat", "sethome", "home", "info", "list", "admin", "help");
 
     private final KingdomClaimPlugin plugin;
     private final KingdomManager kingdoms;
     private final PlayerDataManager playerData;
+    private final WarManager warManager;
 
-    public KingdomCommand(KingdomClaimPlugin plugin, KingdomManager kingdoms, PlayerDataManager playerData) {
+    public KingdomCommand(KingdomClaimPlugin plugin, KingdomManager kingdoms, PlayerDataManager playerData, WarManager warManager) {
         this.plugin = plugin;
         this.kingdoms = kingdoms;
         this.playerData = playerData;
+        this.warManager = warManager;
     }
 
     @Override
@@ -76,6 +79,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             case "visualize" -> requirePlayer(sender, this::visualize);
             case "gui" -> requirePlayer(sender, this::openGui);
             case "relation" -> requirePlayer(sender, p -> relation(p, rest));
+            case "declarewar" -> requirePlayer(sender, p -> declareWar(p, rest));
             case "chat" -> requirePlayer(sender, this::toggleChat);
             case "sethome" -> requirePlayer(sender, this::setHome);
             case "home" -> requirePlayer(sender, this::home);
@@ -351,14 +355,18 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            Messages.error(player, "Usage: /kingdom relation <ally|neutral|enemy|war> <kingdom>");
+            Messages.error(player, "Usage: /kingdom relation <ally|neutral|enemy> <kingdom>");
+            return;
+        }
+        if (args[0].equalsIgnoreCase("war")) {
+            Messages.error(player, "War can't be set directly — use /kingdom declarewar <kingdom>.");
             return;
         }
         RelationType type;
         try {
             type = RelationType.valueOf(args[0].toUpperCase());
         } catch (IllegalArgumentException e) {
-            Messages.error(player, "Unknown relation type. Use ally, neutral, enemy or war.");
+            Messages.error(player, "Unknown relation type. Use ally, neutral or enemy.");
             return;
         }
         Optional<Kingdom> targetOpt = kingdoms.byName(args[1]);
@@ -368,6 +376,19 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
         }
         kingdoms.setRelation(kingdom, targetOpt.get(), type);
         Messages.success(player, kingdom.name() + " now considers " + targetOpt.get().name() + ": " + type.name());
+    }
+
+    private void declareWar(Player player, String[] args) {
+        if (args.length < 1) {
+            Messages.error(player, "Usage: /kingdom declarewar <kingdom>");
+            return;
+        }
+        Optional<Kingdom> targetOpt = kingdoms.byName(args[0]);
+        if (targetOpt.isEmpty()) {
+            Messages.error(player, "Unknown kingdom: " + args[0]);
+            return;
+        }
+        warManager.declareWar(player, targetOpt.get());
     }
 
     // ---- misc ----
@@ -495,7 +516,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         Messages.info(sender, "KingdomClaim commands: /kingdom <create|disband|invite|accept|deny|invites|leave|kick|"
-                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|chat|sethome|home|info|list>");
+                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|declarewar|chat|sethome|home|info|list>");
     }
 
     @Override
@@ -509,8 +530,8 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             String sub = args[0].toLowerCase();
             return switch (sub) {
                 case "invite", "kick", "promote", "demote", "transfer" -> onlinePlayerNames(args[1]);
-                case "accept", "deny", "info" -> kingdomNames(args[1]);
-                case "relation" -> Stream.of("ally", "neutral", "enemy", "war")
+                case "accept", "deny", "info", "declarewar" -> kingdomNames(args[1]);
+                case "relation" -> Stream.of("ally", "neutral", "enemy")
                         .filter(s -> s.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
                 default -> List.of();

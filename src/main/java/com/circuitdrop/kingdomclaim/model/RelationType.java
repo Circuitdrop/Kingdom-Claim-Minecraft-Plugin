@@ -3,9 +3,10 @@ package com.circuitdrop.kingdomclaim.model;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
- * Diplomatic state one kingdom holds towards another. Relations are one-directional
- * proposals that become mutual once both sides declare the same (or a compatible) state;
- * see {@code RelationManager} for the reconciliation rules.
+ * Diplomatic state one kingdom holds towards another. ALLY/NEUTRAL/ENEMY are
+ * one-directional declarations reconciled by {@code Diplomacy} (ALLY needs both
+ * sides to agree; ENEMY takes effect unilaterally). WAR is never set directly —
+ * only {@code WarManager} writes it, after its declare-war gating and notice delay.
  */
 public enum RelationType {
     ALLY(NamedTextColor.GREEN, false, false),

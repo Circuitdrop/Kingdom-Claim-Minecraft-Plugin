@@ -60,7 +60,8 @@ public class RelationGui implements GuiHolder {
                     .lore(Component.text("Left-click: propose Ally", NamedTextColor.GREEN))
                     .lore(Component.text("Right-click: set Neutral", NamedTextColor.YELLOW))
                     .lore(Component.text("Shift-left: declare Enemy", NamedTextColor.GOLD))
-                    .lore(Component.text("Shift-right: declare War", NamedTextColor.DARK_RED))
+                    .lore(Component.text("Shift-right: declare War (30 min notice,", NamedTextColor.DARK_RED))
+                    .lore(Component.text("  needs officer+ & their king online)", NamedTextColor.DARK_RED))
                     .build());
         }
         inventory.setItem(49, new ItemBuilder(Material.BARRIER).name(Component.text("Back", NamedTextColor.YELLOW)).build());
@@ -102,11 +103,15 @@ public class RelationGui implements GuiHolder {
             return;
         }
         Kingdom other = others.get(slot);
+        if (clickType == ClickType.SHIFT_RIGHT) {
+            plugin.getWarManager().declareWar(player, other);
+            player.closeInventory();
+            return;
+        }
         RelationType newRelation = switch (clickType) {
             case LEFT -> RelationType.ALLY;
             case RIGHT -> RelationType.NEUTRAL;
             case SHIFT_LEFT -> RelationType.ENEMY;
-            case SHIFT_RIGHT -> RelationType.WAR;
             default -> null;
         };
         if (newRelation == null) {

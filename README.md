@@ -10,18 +10,36 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
 - **Kingdoms & membership** — found a kingdom, invite/accept/kick, three
   ranks (King, Officer, Member), kingship transfer, kingdom-only chat.
 - **Claiming & protection** — officers+ claim/unclaim the chunk they're
-  standing in; block break/place, containers, doors and PvP are protected
-  from non-members inside claimed land.
+  standing in. At peace, only members of the owning kingdom may break or
+  place any block, use a bucket, or right-click anything in a claim
+  (containers, doors, buttons, all of it) — there's no officer-only
+  carve-out for everyday building.
 - **Claim visualization & management GUI** — `/kingdom gui` opens a menu for
   members, claims and relations; the claims screen paginates every claimed
   chunk with click-to-teleport and click-to-unclaim, plus a one-click
   "visualize all" that draws every claim's border in particles (visible only
   to you). `/kingdom map` renders a quick ASCII ownership grid in chat.
-- **Diplomacy & PvP** — kingdoms declare ALLY / NEUTRAL / ENEMY / WAR towards
-  each other (via command or the Relations GUI screen). PvP and claim-raiding
-  are only permitted between kingdoms whose effective relation allows it;
-  ALLY requires both sides to agree, while ENEMY/WAR take effect the moment
-  either side declares them.
+- **Diplomacy, PvP & war raiding** — kingdoms declare ALLY / NEUTRAL / ENEMY
+  towards each other instantly (command or the Relations GUI); ALLY needs
+  both sides to agree, ENEMY takes effect the moment either side declares
+  it and opens PvP. WAR is a heavier, gated declaration (see below) that
+  additionally lets the attacker breach the defender's claims with TNT —
+  and only TNT: no other block may be broken, placed, or interacted with
+  by a non-member, war or not.
+
+  **Declaring war** (`/kingdom declarewar <kingdom>` or the Relations GUI):
+  - Only a king or officer of the declaring kingdom may declare war.
+  - The defending kingdom's king must be online at the moment of declaration.
+  - War doesn't start immediately: there's a 30-minute notice period during
+    which nothing war-related is active (no raiding, no forced PvP) —
+    both kingdoms are notified when it's declared and again when it begins.
+  - Once active, the attacking kingdom's members may place and light TNT
+    inside the defender's claims — nothing else. They still cannot break
+    blocks directly, open doors/containers, or place anything but TNT;
+    the only way in is blowing a way in. Each authorized TNT explosion only
+    damages that specific defender's claims — other kingdoms' land, and any
+    explosion not tied to an authorized war TNT (creepers, stray TNT, etc.),
+    stays protected.
 
 ## Commands
 
@@ -40,7 +58,8 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `map` | Show an ASCII ownership map of nearby chunks |
 | `visualize` | Show your kingdom's claim borders as particles |
 | `gui` | Open the kingdom management menu |
-| `relation <ally\|neutral\|enemy\|war> <kingdom>` | Set your kingdom's stance towards another (officer+) |
+| `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (officer+) |
+| `declarewar <kingdom>` | Declare war (officer+, defender's king must be online, 30 min notice) |
 | `chat` | Toggle kingdom-only chat |
 | `sethome` / `home` | Set/teleport to the kingdom home (must be on claimed land) |
 | `info [kingdom]` | Show kingdom stats |
