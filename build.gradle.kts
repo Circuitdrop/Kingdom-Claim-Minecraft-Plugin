@@ -7,7 +7,7 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
@@ -17,15 +17,15 @@ repositories {
 }
 
 dependencies {
-    // Server is Paper 26.2 (calendar-versioned Minecraft, requires Java 25 at runtime).
-    // Building against Java 21 bytecode keeps the plugin usable on any Paper build that ships that runtime.
+    // Server is Paper 26.2 (calendar-versioned Minecraft). Its paper-api artifact declares
+    // a minimum JVM target of 25 in its Gradle module metadata, so the build must use 25 too.
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 }
 
 tasks {
     compileJava {
         options.encoding = "UTF-8"
-        options.release.set(21)
+        options.release.set(25)
     }
 
     processResources {

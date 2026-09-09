@@ -80,7 +80,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 
 ## Building
 
-Requires JDK 21+, Gradle 8.x, and network access to `repo.papermc.io`
+Requires JDK 25+, Gradle 8.x, and network access to `repo.papermc.io`
 (blocked in some sandboxed CI environments — build from a machine/CI that can
 reach it). No Gradle wrapper is checked in; use a local Gradle install, or
 generate one yourself with `gradle wrapper`:
