@@ -1,0 +1,7 @@
+# KingdomClaim configuration
+
+# How often (in minutes) kingdom data is autosaved to kingdoms.yml, in addition to the save on shutdown.
+autosave-minutes: 5
+
+# Maximum number of chunks a single kingdom may have claimed at once.
+max-claims-per-kingdom: 200

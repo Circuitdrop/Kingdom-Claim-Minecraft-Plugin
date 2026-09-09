@@ -1,0 +1,22 @@
+name: KingdomClaim
+version: '${version}'
+main: com.circuitdrop.kingdomclaim.KingdomClaimPlugin
+api-version: '26.2'
+author: circuitdrop
+description: Kingdoms, chunk claiming/protection, claim visualization and inter-kingdom diplomacy for Paper 26.2.
+website: https://github.com/circuitdrop/kingdom-claim-minecraft-plugin
+
+commands:
+  kingdom:
+    description: Manage your kingdom, claims and diplomacy.
+    usage: /kingdom <subcommand>
+    aliases: [k, kd]
+    permission: kingdomclaim.use
+
+permissions:
+  kingdomclaim.use:
+    description: Allows use of the base /kingdom command and its member-level subcommands.
+    default: true
+  kingdomclaim.admin:
+    description: Allows bypassing claim protection and using /kingdom admin subcommands.
+    default: op
