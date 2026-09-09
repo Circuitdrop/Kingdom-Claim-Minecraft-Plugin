@@ -5,3 +5,7 @@ autosave-minutes: 5
 
 # Maximum number of chunks a single kingdom may have claimed at once.
 max-claims-per-kingdom: 200
+
+# Whether players can teleport to their kingdom's home with /kingdom home.
+# Setting a home with /kingdom sethome is always allowed regardless of this.
+home-teleport-enabled: true

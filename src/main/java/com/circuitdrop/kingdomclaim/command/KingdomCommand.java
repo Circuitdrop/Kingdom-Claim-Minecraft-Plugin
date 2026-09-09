@@ -12,6 +12,7 @@ import com.circuitdrop.kingdomclaim.model.RelationType;
 import com.circuitdrop.kingdomclaim.util.ChunkVisualizer;
 import com.circuitdrop.kingdomclaim.util.MapRenderer;
 import com.circuitdrop.kingdomclaim.util.Messages;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -38,7 +39,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
     private static final List<String> SUBCOMMANDS = List.of(
             "create", "disband", "invite", "accept", "deny", "invites", "leave", "kick",
             "promote", "demote", "transfer", "claim", "unclaim", "map", "visualize", "gui",
-            "relation", "declarewar", "chat", "sethome", "home", "info", "list", "admin", "help");
+            "relation", "declarewar", "color", "chat", "sethome", "home", "info", "list", "admin", "help");
 
     private final KingdomClaimPlugin plugin;
     private final KingdomManager kingdoms;
@@ -80,6 +81,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             case "gui" -> requirePlayer(sender, this::openGui);
             case "relation" -> requirePlayer(sender, p -> relation(p, rest));
             case "declarewar" -> requirePlayer(sender, p -> declareWar(p, rest));
+            case "color" -> requirePlayer(sender, p -> setColor(p, rest));
             case "chat" -> requirePlayer(sender, this::toggleChat);
             case "sethome" -> requirePlayer(sender, this::setHome);
             case "home" -> requirePlayer(sender, this::home);
@@ -350,8 +352,8 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
     private void relation(Player player, String[] args) {
         Kingdom kingdom = requireOwnKingdom(player);
         if (kingdom == null) return;
-        if (!kingdom.rankOf(player.getUniqueId()).atLeast(Rank.OFFICER)) {
-            Messages.error(player, "Only officers and the king can change relations.");
+        if (kingdom.rankOf(player.getUniqueId()) != Rank.KING) {
+            Messages.error(player, "Only the king can change relations.");
             return;
         }
         if (args.length < 2) {
@@ -391,6 +393,34 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
         warManager.declareWar(player, targetOpt.get());
     }
 
+    private void setColor(Player player, String[] args) {
+        Kingdom kingdom = requireOwnKingdom(player);
+        if (kingdom == null) return;
+        if (kingdom.rankOf(player.getUniqueId()) != Rank.KING) {
+            Messages.error(player, "Only the king can set the kingdom's color.");
+            return;
+        }
+        if (args.length < 1) {
+            Messages.error(player, "Usage: /kingdom color <color>. Valid: " + String.join(", ", colorNames()));
+            return;
+        }
+        NamedTextColor color = NamedTextColor.NAMES.value(args[0].toLowerCase());
+        if (color == null) {
+            Messages.error(player, "Unknown color. Valid: " + String.join(", ", colorNames()));
+            return;
+        }
+        kingdoms.updateColor(kingdom, color);
+        Messages.success(player, "Kingdom color set to " + args[0].toLowerCase() + ".");
+    }
+
+    private List<String> colorNames() {
+        List<String> names = new java.util.ArrayList<>();
+        for (String name : NamedTextColor.NAMES.keys()) {
+            names.add(name);
+        }
+        return names;
+    }
+
     // ---- misc ----
 
     private void toggleChat(Player player) {
@@ -422,6 +452,10 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
     }
 
     private void home(Player player) {
+        if (!plugin.getConfig().getBoolean("home-teleport-enabled", true)) {
+            Messages.error(player, "Home teleportation is disabled on this server.");
+            return;
+        }
         Kingdom kingdom = requireOwnKingdom(player);
         if (kingdom == null) return;
         if (kingdom.home() == null) {
@@ -516,7 +550,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         Messages.info(sender, "KingdomClaim commands: /kingdom <create|disband|invite|accept|deny|invites|leave|kick|"
-                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|declarewar|chat|sethome|home|info|list>");
+                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|declarewar|color|chat|sethome|home|info|list>");
     }
 
     @Override
@@ -532,6 +566,9 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
                 case "invite", "kick", "promote", "demote", "transfer" -> onlinePlayerNames(args[1]);
                 case "accept", "deny", "info", "declarewar" -> kingdomNames(args[1]);
                 case "relation" -> Stream.of("ally", "neutral", "enemy")
+                        .filter(s -> s.startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+                case "color" -> colorNames().stream()
                         .filter(s -> s.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
                 default -> List.of();

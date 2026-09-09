@@ -4,6 +4,7 @@ import com.circuitdrop.kingdomclaim.model.ClaimChunk;
 import com.circuitdrop.kingdomclaim.model.Kingdom;
 import com.circuitdrop.kingdomclaim.model.Rank;
 import com.circuitdrop.kingdomclaim.model.RelationType;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +27,11 @@ public class KingdomManager {
     private final Map<ClaimChunk, UUID> kingdomByClaim = new HashMap<>();
     private final Map<UUID, UUID> kingdomByPlayer = new HashMap<>();
     private final Map<UUID, Set<UUID>> pendingInvites = new HashMap<>(); // player -> kingdom ids that invited them
+    private final TeamManager teamManager;
+
+    public KingdomManager(TeamManager teamManager) {
+        this.teamManager = teamManager;
+    }
 
     public Kingdom createKingdom(String name, UUID founder) {
         UUID id = UUID.randomUUID();
@@ -45,6 +51,7 @@ public class KingdomManager {
         for (ClaimChunk claim : kingdom.claims()) {
             kingdomByClaim.put(claim, kingdom.id());
         }
+        teamManager.sync(kingdom);
     }
 
     public void disbandKingdom(Kingdom kingdom) {
@@ -55,6 +62,12 @@ public class KingdomManager {
         for (Kingdom other : kingdomsById.values()) {
             other.relations().remove(kingdom.id());
         }
+        teamManager.remove(kingdom);
+    }
+
+    public void updateColor(Kingdom kingdom, NamedTextColor color) {
+        kingdom.setColor(color);
+        teamManager.sync(kingdom);
     }
 
     public void renameKingdom(Kingdom kingdom, String newName) {
@@ -91,11 +104,13 @@ public class KingdomManager {
         kingdom.members().put(player, rank);
         kingdomByPlayer.put(player, kingdom.id());
         clearInvites(player);
+        teamManager.sync(kingdom);
     }
 
     public void removeMember(Kingdom kingdom, UUID player) {
         kingdom.members().remove(player);
         kingdomByPlayer.remove(player);
+        teamManager.sync(kingdom);
     }
 
     public boolean claimChunk(Kingdom kingdom, ClaimChunk chunk) {

@@ -9,6 +9,11 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
 
 - **Kingdoms & membership** — found a kingdom, invite/accept/kick, three
   ranks (King, Officer, Member), kingship transfer, kingdom-only chat.
+- **Kingdom color & crown** — the king picks a color (`/kingdom color <color>`)
+  that tints every member's nametag, tab-list entry, and chat name (via two
+  per-kingdom scoreboard teams); the king additionally shows a crown (♔)
+  next to their name everywhere it appears, so leadership is visible at a
+  glance.
 - **Claiming & protection** — officers+ claim/unclaim the chunk they're
   standing in. At peace, only members of the owning kingdom may break or
   place any block, use a bucket, or right-click anything in a claim
@@ -28,7 +33,8 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   by a non-member, war or not.
 
   **Declaring war** (`/kingdom declarewar <kingdom>` or the Relations GUI):
-  - Only a king or officer of the declaring kingdom may declare war.
+  - Only the king of the declaring kingdom may declare war (as with setting
+    Ally/Neutral/Enemy — all diplomacy is a king-only power).
   - The defending kingdom's king must be online at the moment of declaration.
   - War doesn't start immediately: there's a 30-minute notice period during
     which nothing war-related is active (no raiding, no forced PvP) —
@@ -58,8 +64,9 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `map` | Show an ASCII ownership map of nearby chunks |
 | `visualize` | Show your kingdom's claim borders as particles |
 | `gui` | Open the kingdom management menu |
-| `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (officer+) |
-| `declarewar <kingdom>` | Declare war (officer+, defender's king must be online, 30 min notice) |
+| `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
+| `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
+| `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |
 | `sethome` / `home` | Set/teleport to the kingdom home (must be on claimed land) |
 | `info [kingdom]` | Show kingdom stats |
@@ -89,4 +96,6 @@ drop it into your Paper 26.2 server's `plugins/` folder.
 
 Kingdom data is stored in `plugins/KingdomClaim/kingdoms.yml`, autosaved on
 the interval configured in `config.yml` (`autosave-minutes`, default 5) and
-on server shutdown.
+on server shutdown. `config.yml` also has `max-claims-per-kingdom` (default
+200) and `home-teleport-enabled` (default `true` — set `false` to disable
+`/kingdom home` server-wide; `/kingdom sethome` still works either way).

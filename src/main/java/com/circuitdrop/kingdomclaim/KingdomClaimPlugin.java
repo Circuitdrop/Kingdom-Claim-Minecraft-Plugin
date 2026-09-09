@@ -4,6 +4,7 @@ import com.circuitdrop.kingdomclaim.command.KingdomCommand;
 import com.circuitdrop.kingdomclaim.manager.DataManager;
 import com.circuitdrop.kingdomclaim.manager.KingdomManager;
 import com.circuitdrop.kingdomclaim.manager.PlayerDataManager;
+import com.circuitdrop.kingdomclaim.manager.TeamManager;
 import com.circuitdrop.kingdomclaim.manager.WarManager;
 import com.circuitdrop.kingdomclaim.listener.GuiListener;
 import com.circuitdrop.kingdomclaim.listener.KingdomChatListener;
@@ -22,7 +23,7 @@ public final class KingdomClaimPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        kingdomManager = new KingdomManager();
+        kingdomManager = new KingdomManager(new TeamManager());
         playerDataManager = new PlayerDataManager();
         dataManager = new DataManager(this);
         dataManager.load(kingdomManager);

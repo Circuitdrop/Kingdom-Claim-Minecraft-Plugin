@@ -4,6 +4,7 @@ import com.circuitdrop.kingdomclaim.model.ClaimChunk;
 import com.circuitdrop.kingdomclaim.model.Kingdom;
 import com.circuitdrop.kingdomclaim.model.Rank;
 import com.circuitdrop.kingdomclaim.model.RelationType;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -51,6 +52,9 @@ public class DataManager {
                 readClaims(kingdom, section);
                 if (section.contains("home")) {
                     kingdom.setHome(section.getString("home"));
+                }
+                if (section.contains("color")) {
+                    kingdom.setColor(NamedTextColor.NAMES.value(section.getString("color")));
                 }
                 manager.register(kingdom);
             } catch (Exception e) {
@@ -108,6 +112,9 @@ public class DataManager {
             section.set("name", kingdom.name());
             if (kingdom.home() != null) {
                 section.set("home", kingdom.home());
+            }
+            if (kingdom.color() != null) {
+                section.set("color", NamedTextColor.NAMES.key(kingdom.color()));
             }
             ConfigurationSection members = section.createSection("members");
             kingdom.members().forEach((uuid, rank) -> members.set(uuid.toString(), rank.name()));

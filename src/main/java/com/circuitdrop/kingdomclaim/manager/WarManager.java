@@ -49,9 +49,8 @@ public class WarManager {
             Messages.error(declarer, "You cannot declare war on your own kingdom.");
             return;
         }
-        Rank rank = attacker.rankOf(declarer.getUniqueId());
-        if (rank == null || !rank.atLeast(Rank.OFFICER)) {
-            Messages.error(declarer, "Only officers and the king can declare war.");
+        if (attacker.rankOf(declarer.getUniqueId()) != Rank.KING) {
+            Messages.error(declarer, "Only the king can declare war.");
             return;
         }
         if (isActiveWar(attacker, target)) {

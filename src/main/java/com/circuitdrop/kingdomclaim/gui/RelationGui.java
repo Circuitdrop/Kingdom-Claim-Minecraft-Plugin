@@ -61,7 +61,7 @@ public class RelationGui implements GuiHolder {
                     .lore(Component.text("Right-click: set Neutral", NamedTextColor.YELLOW))
                     .lore(Component.text("Shift-left: declare Enemy", NamedTextColor.GOLD))
                     .lore(Component.text("Shift-right: declare War (30 min notice,", NamedTextColor.DARK_RED))
-                    .lore(Component.text("  needs officer+ & their king online)", NamedTextColor.DARK_RED))
+                    .lore(Component.text("  king only, needs their king online)", NamedTextColor.DARK_RED))
                     .build());
         }
         inventory.setItem(49, new ItemBuilder(Material.BARRIER).name(Component.text("Back", NamedTextColor.YELLOW)).build());
@@ -97,9 +97,8 @@ public class RelationGui implements GuiHolder {
         if (slot >= others.size() || slot >= 45) {
             return;
         }
-        Rank actorRank = kingdom.rankOf(player.getUniqueId());
-        if (actorRank == null || !actorRank.atLeast(Rank.OFFICER)) {
-            Messages.error(player, "Only officers and the king can change relations.");
+        if (kingdom.rankOf(player.getUniqueId()) != Rank.KING) {
+            Messages.error(player, "Only the king can change relations.");
             return;
         }
         Kingdom other = others.get(slot);

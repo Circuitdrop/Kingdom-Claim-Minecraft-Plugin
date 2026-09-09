@@ -1,5 +1,7 @@
 package com.circuitdrop.kingdomclaim.model;
 
+import net.kyori.adventure.text.format.NamedTextColor;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -20,6 +22,7 @@ public class Kingdom {
     private final Set<ClaimChunk> claims = new HashSet<>();
     private final Map<UUID, RelationType> relations = new HashMap<>();
     private String home; // serialized ClaimChunk-style world;x;y;z;yaw;pitch, nullable
+    private NamedTextColor color; // nullable; defaults to white when unset
 
     public Kingdom(UUID id, String name, UUID founder) {
         this.id = id;
@@ -81,5 +84,13 @@ public class Kingdom {
 
     public int memberCount() {
         return members.size();
+    }
+
+    public NamedTextColor color() {
+        return color;
+    }
+
+    public void setColor(NamedTextColor color) {
+        this.color = color;
     }
 }
