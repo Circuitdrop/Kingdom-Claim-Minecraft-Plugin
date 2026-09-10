@@ -14,10 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Install JDK 25 (for the project's Java toolchain, see gradle.properties)
+      # and JDK 21 last so it becomes the default JAVA_HOME — Gradle 8.x itself
+      # can't yet run its own build engine on a JDK 25 JVM.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: |
+            25
+            21
 
       - uses: gradle/actions/setup-gradle@v4
         with:
