@@ -164,7 +164,7 @@ public class ProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onExplode(EntityExplodeEvent event) {
-        RaidAuthorization auth = event.getEntityType() == EntityType.PRIMED_TNT
+        RaidAuthorization auth = event.getEntityType() == EntityType.TNT
                 ? consumeAuthorization(event.getEntity().getLocation().getBlock())
                 : null;
         event.blockList().removeIf(block -> {
