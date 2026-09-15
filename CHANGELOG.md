@@ -49,6 +49,9 @@ the plugin's full history so far, oldest first.
 - **War cobwebs**: attackers may now also place cobwebs (not just TNT)
   inside the defender's claims during an active war, to slow defenders
   down; toggleable via `war-cobwebs-enabled` in config.yml (default `true`).
+- **War cobwebs breakable**: cobwebs can now also be broken by non-members
+  during an active war (previously only placeable), so attackers and
+  defenders alike can clear them once they've served their purpose.
 
 ## Altered
 
@@ -127,4 +130,4 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `claim-teleport-enabled` | `true` | Whether clicking a claim in the GUI teleports you |
 | `allow-nether-claims` | `false` | Whether `/kingdom claim` works in the Nether |
 | `surrender-claim-loss-percent` | `20` | % of claims lost, edge-first, on surrender |
-| `war-cobwebs-enabled` | `true` | Whether attackers may place cobwebs (alongside TNT) in a defender's claim during war |
+| `war-cobwebs-enabled` | `true` | Whether attackers may place and break cobwebs (alongside TNT) in a defender's claim during war |

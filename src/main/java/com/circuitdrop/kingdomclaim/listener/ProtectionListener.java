@@ -47,12 +47,16 @@ import java.util.UUID;
  * During an active WAR (see {@link WarManager}), the attacking kingdom's
  * members gain privileges inside the defender's claims: placing and lighting
  * TNT, and (if {@code war-cobwebs-enabled} in config.yml, default true)
- * placing cobwebs to slow defenders down. They can still not break blocks
- * directly, interact with anything, or place any other block — the only way
- * in is blowing a way in. TNT placed/lit under that privilege is tagged so
- * only its own blast (and only against that specific defender's claims) is
- * allowed to remove blocks; every other explosion inside a claim (creepers,
- * unrelated TNT, blast spill onto an unrelated claim) is neutralized.
+ * placing cobwebs to slow defenders down. Cobwebs are the one block a
+ * non-member may also break under that same condition, so either side can
+ * clear them once war breaks out (defenders can already break anything on
+ * their own land regardless). Attackers still cannot break any other block
+ * directly, interact with anything, or place anything but TNT and cobwebs —
+ * the only way in is blowing a way in. TNT placed/lit under that privilege
+ * is tagged so only its own blast (and only against that specific defender's
+ * claims) is allowed to remove blocks; every other explosion inside a claim
+ * (creepers, unrelated TNT, blast spill onto an unrelated claim) is
+ * neutralized.
  */
 public class ProtectionListener implements Listener {
 
@@ -73,10 +77,19 @@ public class ProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
-        if (!canBuild(event.getPlayer(), event.getBlock().getLocation())) {
-            event.setCancelled(true);
-            Messages.error(event.getPlayer(), "This land belongs to another kingdom.");
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+        if (canBuild(player, block.getLocation())) {
+            return;
         }
+        if (block.getType() == Material.COBWEB && warCobwebsEnabled()) {
+            Optional<Kingdom> ownerOpt = kingdoms.kingdomAt(ClaimChunk.of(block.getLocation()));
+            if (ownerOpt.isPresent() && atWarWith(player, ownerOpt.get())) {
+                return; // attackers may clear cobwebs they (or the defender) placed during an active war
+            }
+        }
+        event.setCancelled(true);
+        Messages.error(player, "This land belongs to another kingdom.");
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
