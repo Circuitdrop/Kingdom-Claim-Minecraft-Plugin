@@ -32,6 +32,11 @@ public class Kingdom {
     // on top of whatever chunks were actually stripped. Only an admin can clear it
     // (/kingdom admin resetpenalty), which is the point - it isn't self-service.
     private int claimCapPenalty;
+    // Kingdom ids this kingdom declared war on and is still actively fighting.
+    // Tracked so that surrendering a war you started never costs you claims -
+    // only a defender capitulating does. A war active before this field existed
+    // has no entry here, so it falls back to the old "whoever surrenders pays" rule.
+    private final Set<UUID> warsDeclared = new HashSet<>();
 
     public Kingdom(UUID id, String name, UUID founder) {
         this.id = id;
@@ -113,5 +118,9 @@ public class Kingdom {
 
     public void setClaimCapPenalty(int claimCapPenalty) {
         this.claimCapPenalty = claimCapPenalty;
+    }
+
+    public Set<UUID> warsDeclared() {
+        return warsDeclared;
     }
 }

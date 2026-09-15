@@ -51,6 +51,7 @@ public class DataManager {
                 readMembers(kingdom, section);
                 readClaims(kingdom, section);
                 readClaimSpawns(kingdom, section);
+                readWarsDeclared(kingdom, section);
                 if (section.contains("home")) {
                     kingdom.setHome(section.getString("home"));
                 }
@@ -105,6 +106,13 @@ public class DataManager {
         }
     }
 
+    /** Older saves (from before attacker-tracking existed) simply have no entries here. */
+    private void readWarsDeclared(Kingdom kingdom, ConfigurationSection section) {
+        for (String raw : section.getStringList("wars-declared")) {
+            kingdom.warsDeclared().add(UUID.fromString(raw));
+        }
+    }
+
     private void readRelations(Kingdom kingdom, ConfigurationSection section) {
         ConfigurationSection relations = section.getConfigurationSection("relations");
         if (relations == null) {
@@ -137,6 +145,7 @@ public class DataManager {
             section.set("claims", kingdom.claims().stream().map(ClaimChunk::serialize).toList());
             ConfigurationSection claimSpawns = section.createSection("claim-spawns");
             kingdom.claimSpawns().forEach((chunk, spawn) -> claimSpawns.set(chunk.serialize(), spawn));
+            section.set("wars-declared", kingdom.warsDeclared().stream().map(UUID::toString).toList());
             ConfigurationSection relations = section.createSection("relations");
             kingdom.relations().forEach((uuid, type) -> relations.set(uuid.toString(), type.name()));
         }

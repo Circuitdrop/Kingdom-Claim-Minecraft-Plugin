@@ -2,7 +2,7 @@
 
 All notable changes to KingdomClaim are tracked here, split into what was
 **Added** (new capability) and what was later **Altered** (changed behavior
-of something already shipped). Current version: `1.1.0`. Everything through
+of something already shipped). Current version: `1.2.0`. Everything through
 that bump reads top-to-bottom as the plugin's full history so far, oldest
 first; every update from here on gets its own version bump in
 `build.gradle.kts` (which also names the built jar).
@@ -87,6 +87,22 @@ first; every update from here on gets its own version bump in
   ENEMY is now a pure diplomatic signal — it no longer lets you attack their
   members inside their own claims. Only an active WAR does; wilderness PvP
   was already unrestricted for everyone regardless of relation.
+- **Critical fix: defenders couldn't fight back in their own claim during
+  war**. PvP inside a claim only ever checked whether the *attacker* was a
+  member of the land's owning kingdom, and if so, blocked the swing as
+  "friendly fire" — with no check on who the *victim* actually was. That
+  meant a defender attacking a raider standing on their own land got
+  cancelled outright, leaving them defenseless in their own claim during an
+  active war. PvP is now permitted in both directions between the two
+  warring kingdoms; the friendly-fire block only fires when attacker and
+  victim are both members of the land's owning kingdom.
+- **Surrendering a war you declared no longer costs land**: only the
+  defender capitulating pays the `surrender-claim-loss-percent` penalty now.
+  The kingdom that originally declared the war can call `/kingdom surrender`
+  at any point to stand down for free — it isn't giving anything up by
+  walking away from a fight it started. (A war already active before this
+  change has no recorded declarer, so it falls back to the old behavior of
+  whoever surrenders paying the penalty.)
 
 ## Commands
 
@@ -111,7 +127,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
 | `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
 | `canceldeclare <kingdom>` | Call off your own pending war declaration before it starts (king only) |
-| `surrender <kingdom>` | End an active war immediately, at a claim-loss cost (king only, either side) |
+| `surrender <kingdom>` | End an active war immediately (king only, either side); only the defender pays the claim-loss cost — the original declarer stands down for free |
 | `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |
 | `sethome` | Set the kingdom home (must be on claimed land, officer+) |

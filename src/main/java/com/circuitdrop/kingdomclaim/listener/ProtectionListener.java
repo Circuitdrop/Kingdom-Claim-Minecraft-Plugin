@@ -44,8 +44,14 @@ import java.util.UUID;
  * building. Animal-killing is the one exception that opens up during an
  * active WAR too (see below); item frames do not.
  * <p>
- * During an active WAR (see {@link WarManager}), the attacking kingdom's
- * members gain privileges inside the defender's claims: placing and lighting
+ * During an active WAR (see {@link WarManager}), PvP opens up between the
+ * two warring kingdoms inside the defender's claims in both directions:
+ * attackers may fight defenders there, and defenders may fight back against
+ * attackers on their own land — neither side is limited to fighting members
+ * of the claim's owning kingdom specifically.
+ * <p>
+ * The attacking kingdom's members also gain privileges inside the defender's
+ * claims: placing and lighting
  * TNT, and (if {@code war-cobwebs-enabled} in config.yml, default true)
  * placing cobwebs to slow defenders down. Cobwebs are the one block a
  * non-member may also break under that same condition, so either side can
@@ -246,9 +252,22 @@ public class ProtectionListener implements Listener {
             return;
         }
         Optional<Kingdom> attackerKingdom = kingdoms.kingdomOf(attacker.getUniqueId());
-        if (attackerKingdom.isPresent() && attackerKingdom.get().id().equals(owner.get().id())) {
+        Optional<Kingdom> victimKingdom = kingdoms.kingdomOf(victim.getUniqueId());
+        boolean attackerIsLandOwner = attackerKingdom.isPresent() && attackerKingdom.get().id().equals(owner.get().id());
+        boolean victimIsLandOwner = victimKingdom.isPresent() && victimKingdom.get().id().equals(owner.get().id());
+        if (attackerIsLandOwner && victimIsLandOwner) {
             event.setCancelled(true);
             Messages.error(attacker, "You cannot attack fellow kingdom members on your own land.");
+            return;
+        }
+        if (attackerIsLandOwner) {
+            // Defender fighting back on their own claim: allowed only against a victim
+            // whose kingdom the defender is actually at war with — not just anyone standing there.
+            RelationType relation = victimKingdom.map(k -> Diplomacy.effectiveRelation(owner.get(), k)).orElse(RelationType.NEUTRAL);
+            if (!relation.pvpAllowed()) {
+                event.setCancelled(true);
+                Messages.error(attacker, "PvP is disabled here — your kingdom is not at war with them.");
+            }
             return;
         }
         RelationType relation = attackerKingdom.map(k -> Diplomacy.effectiveRelation(k, owner.get())).orElse(RelationType.NEUTRAL);

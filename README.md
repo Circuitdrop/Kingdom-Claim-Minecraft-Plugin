@@ -41,10 +41,13 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   it. ENEMY is a diplomatic signal only, though — it does not by itself let
   you attack someone inside their own claim (wilderness PvP is already
   unrestricted for everyone regardless of relation). WAR is the only
-  relation that opens claim-interior PvP, and is a heavier, gated
-  declaration (see below) that additionally lets the attacker breach the
-  defender's claims with TNT — and only TNT: no other block may be broken,
-  placed, or interacted with by a non-member, war or not.
+  relation that opens claim-interior PvP, and it opens in both directions:
+  attackers can fight defenders inside the defender's claims, and defenders
+  can fight back there too — nobody has to just stand and take it on their
+  own land. WAR is also a heavier, gated declaration (see below) that
+  additionally lets the attacker breach the defender's claims with TNT —
+  and only TNT: no other block may be broken, placed, or interacted with by
+  a non-member, war or not.
 
   **Declaring war** (`/kingdom declarewar <kingdom>` or the Relations GUI):
   - Only the king of the declaring kingdom may declare war (as with setting
@@ -72,13 +75,18 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
     doubles as the declare-war button when you're not already at war with
     them). Surrendering resets the relation to neutral for both kingdoms
     immediately — no notice period, unlike declaring.
-  - Surrendering costs the surrendering kingdom territory: it loses
-    `surrender-claim-loss-percent` (default 20%) of its claimed chunks,
-    stripped from the edges of its territory inward (the most exposed chunk
-    goes first, recalculated after each one, so it erodes like a coastline
-    rather than leaving holes in the middle). That many chunks also come off
-    its claim limit — it can't just re-claim them back — until an admin
-    lifts the penalty with `/kingdom admin resetpenalty <kingdom>`.
+  - Surrendering only costs territory if you're the defender: the kingdom
+    that originally declared the war can call it off with `/kingdom surrender`
+    at any point and keeps every claim, since it isn't actually losing
+    anything by walking away. The defender capitulating is the one that
+    pays — it loses `surrender-claim-loss-percent` (default 20%) of its
+    claimed chunks, stripped from the edges of its territory inward (the
+    most exposed chunk goes first, recalculated after each one, so it erodes
+    like a coastline rather than leaving holes in the middle). That many
+    chunks also come off its claim limit — it can't just re-claim them back
+    — until an admin lifts the penalty with `/kingdom admin resetpenalty
+    <kingdom>`. (A war still active from before this distinction existed has
+    no recorded declarer, so whoever surrenders it pays the old way.)
 
 ## Commands
 
@@ -100,7 +108,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
 | `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
 | `canceldeclare <kingdom>` | Call off your own pending war declaration before it starts (king only) |
-| `surrender <kingdom>` | End an active war immediately (king only, either side) |
+| `surrender <kingdom>` | End an active war immediately (king only, either side); only the defender pays the claim-loss cost |
 | `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |
 | `sethome` / `home` | Set/teleport to the kingdom home (must be on claimed land) |

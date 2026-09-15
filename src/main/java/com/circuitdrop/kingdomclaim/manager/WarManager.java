@@ -24,7 +24,8 @@ import java.util.UUID;
  * the declaring king can call it off any time before then with
  * {@link #cancelDeclaration}. Either side's king can end an active war
  * unilaterally via {@link #surrender}, which takes effect immediately with
- * no notice period.
+ * no notice period — only the defender pays a claim-loss penalty for it,
+ * though; the kingdom that declared the war can always call it off for free.
  */
 public class WarManager {
 
@@ -117,10 +118,15 @@ public class WarManager {
     }
 
     /**
-     * Either side of a war can end it unilaterally; resets both directions to
-     * NEUTRAL and strips claimLossPercent% of the surrendering kingdom's claims
-     * (from its territory's edges inward) as a penalty - see
-     * {@link KingdomManager#applySurrenderPenalty}.
+     * Either side of a war can end it unilaterally, resetting both directions
+     * to NEUTRAL. Only the defender pays a price for it: if the kingdom
+     * calling surrender is the one that originally declared this war (see
+     * {@link #declareWar}), it just calls off the fight and keeps its land.
+     * Otherwise it's a real capitulation, and it strips claimLossPercent% of
+     * the surrendering kingdom's claims (from its territory's edges inward) -
+     * see {@link KingdomManager#applySurrenderPenalty}. A war that was already
+     * active before attacker-tracking existed has no recorded declarer, so it
+     * falls back to the old rule of whoever surrenders paying the penalty.
      */
     public void surrender(Player player, Kingdom target, int claimLossPercent) {
         Optional<Kingdom> ownOpt = kingdoms.kingdomOf(player.getUniqueId());
@@ -141,13 +147,22 @@ public class WarManager {
             Messages.error(player, "You are not at war with " + target.name() + ".");
             return;
         }
+        boolean ownDeclaredThisWar = own.warsDeclared().contains(target.id());
         kingdoms.setRelation(own, target, RelationType.NEUTRAL);
         kingdoms.setRelation(target, own, RelationType.NEUTRAL);
-        int lost = kingdoms.applySurrenderPenalty(own, claimLossPercent);
-        String message = own.name() + " has surrendered to " + target.name() + ". The war is over.";
-        if (lost > 0) {
-            message += " " + own.name() + " ceded " + lost + " border chunk(s) and its claim limit is"
-                    + " reduced until an admin lifts the penalty.";
+        own.warsDeclared().remove(target.id());
+        target.warsDeclared().remove(own.id());
+
+        String message;
+        if (ownDeclaredThisWar) {
+            message = own.name() + " has called off its war against " + target.name() + ". No claims change hands.";
+        } else {
+            int lost = kingdoms.applySurrenderPenalty(own, claimLossPercent);
+            message = own.name() + " has surrendered to " + target.name() + ". The war is over.";
+            if (lost > 0) {
+                message += " " + own.name() + " ceded " + lost + " border chunk(s) and its claim limit is"
+                        + " reduced until an admin lifts the penalty.";
+            }
         }
         broadcastToKingdom(own, message);
         broadcastToKingdom(target, message);
@@ -164,6 +179,7 @@ public class WarManager {
         Kingdom defender = defenderOpt.get();
         kingdoms.setRelation(attacker, defender, RelationType.WAR);
         kingdoms.setRelation(defender, attacker, RelationType.WAR);
+        attacker.warsDeclared().add(defender.id());
         broadcastToKingdom(attacker, "War with " + defender.name() + " has begun!");
         broadcastToKingdom(defender, "War with " + attacker.name() + " has begun! They may now breach your claims with TNT.");
     }

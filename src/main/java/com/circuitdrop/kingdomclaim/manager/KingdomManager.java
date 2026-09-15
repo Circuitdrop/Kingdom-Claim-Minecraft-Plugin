@@ -62,6 +62,7 @@ public class KingdomManager {
         kingdom.claims().forEach(kingdomByClaim::remove);
         for (Kingdom other : kingdomsById.values()) {
             other.relations().remove(kingdom.id());
+            other.warsDeclared().remove(kingdom.id());
         }
         teamManager.remove(kingdom);
     }
