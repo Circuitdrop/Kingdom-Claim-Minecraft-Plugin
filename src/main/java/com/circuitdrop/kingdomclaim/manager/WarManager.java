@@ -15,11 +15,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Gates how a kingdom enters WAR: only a king/officer may declare it, only
- * against a kingdom whose king is currently online, and it doesn't take
- * effect until a 30-minute notice period has elapsed. Nothing war-related
- * (PvP, TNT raiding) is active until {@link #startWar} actually writes the
- * WAR relation — a pending declaration grants no permissions on its own.
+ * Gates how a kingdom enters WAR: only a king may declare it, only against
+ * a kingdom whose king is currently online, and it doesn't take effect until
+ * a 30-minute notice period has elapsed. Nothing war-related (PvP, TNT
+ * raiding) is active until {@link #startWar} actually writes the WAR
+ * relation — a pending declaration grants no permissions on its own.
+ * Either side's king can end an active war unilaterally via {@link #surrender},
+ * which takes effect immediately with no notice period.
  */
 public class WarManager {
 
@@ -77,6 +79,33 @@ public class WarManager {
         UUID attackerId = attacker.id();
         UUID targetId = target.id();
         Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(attackerId, targetId, key), DECLARATION_NOTICE_TICKS);
+    }
+
+    /** Either side of a war can end it unilaterally; resets both directions to NEUTRAL. */
+    public void surrender(Player player, Kingdom target) {
+        Optional<Kingdom> ownOpt = kingdoms.kingdomOf(player.getUniqueId());
+        if (ownOpt.isEmpty()) {
+            Messages.error(player, "You are not in a kingdom.");
+            return;
+        }
+        Kingdom own = ownOpt.get();
+        if (own.id().equals(target.id())) {
+            Messages.error(player, "You cannot surrender to your own kingdom.");
+            return;
+        }
+        if (own.rankOf(player.getUniqueId()) != Rank.KING) {
+            Messages.error(player, "Only the king can surrender.");
+            return;
+        }
+        if (!isActiveWar(own, target)) {
+            Messages.error(player, "You are not at war with " + target.name() + ".");
+            return;
+        }
+        kingdoms.setRelation(own, target, RelationType.NEUTRAL);
+        kingdoms.setRelation(target, own, RelationType.NEUTRAL);
+        String message = own.name() + " has surrendered to " + target.name() + ". The war is over.";
+        broadcastToKingdom(own, message);
+        broadcastToKingdom(target, message);
     }
 
     private void startWar(UUID attackerId, UUID defenderId, String key) {

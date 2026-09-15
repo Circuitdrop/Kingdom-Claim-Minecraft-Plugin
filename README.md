@@ -55,6 +55,11 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
     damages that specific defender's claims — other kingdoms' land, and any
     explosion not tied to an authorized war TNT (creepers, stray TNT, etc.),
     stays protected.
+  - Either side's king can end an active war with `/kingdom surrender <kingdom>`
+    (or shift-right-clicking that kingdom in the Relations GUI, which
+    doubles as the declare-war button when you're not already at war with
+    them). Surrendering resets the relation to neutral for both kingdoms
+    immediately — no notice period, unlike declaring.
 
 ## Commands
 
@@ -75,6 +80,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `gui` | Open the kingdom management menu |
 | `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
 | `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
+| `surrender <kingdom>` | End an active war immediately (king only, either side) |
 | `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |
 | `sethome` / `home` | Set/teleport to the kingdom home (must be on claimed land) |

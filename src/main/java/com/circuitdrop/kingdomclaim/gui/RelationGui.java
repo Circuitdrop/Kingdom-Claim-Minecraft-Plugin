@@ -54,15 +54,20 @@ public class RelationGui implements GuiHolder {
         for (int i = 0; i < others.size() && i < 45; i++) {
             Kingdom other = others.get(i);
             RelationType effective = Diplomacy.effectiveRelation(kingdom, other);
-            inventory.setItem(i, new ItemBuilder(materialFor(effective))
+            ItemBuilder builder = new ItemBuilder(materialFor(effective))
                     .name(Component.text(other.name(), NamedTextColor.WHITE, TextDecoration.BOLD))
                     .lore(Component.text("Relation: ", NamedTextColor.GRAY).append(Component.text(effective.name(), effective.color())))
                     .lore(Component.text("Left-click: propose Ally", NamedTextColor.GREEN))
                     .lore(Component.text("Right-click: set Neutral", NamedTextColor.YELLOW))
-                    .lore(Component.text("Shift-left: declare Enemy", NamedTextColor.GOLD))
-                    .lore(Component.text("Shift-right: declare War (30 min notice,", NamedTextColor.DARK_RED))
-                    .lore(Component.text("  king only, needs their king online)", NamedTextColor.DARK_RED))
-                    .build());
+                    .lore(Component.text("Shift-left: declare Enemy", NamedTextColor.GOLD));
+            if (effective == RelationType.WAR) {
+                builder.lore(Component.text("Shift-right: surrender (ends the war,", NamedTextColor.DARK_RED))
+                        .lore(Component.text("  king only, takes effect immediately)", NamedTextColor.DARK_RED));
+            } else {
+                builder.lore(Component.text("Shift-right: declare War (30 min notice,", NamedTextColor.DARK_RED))
+                        .lore(Component.text("  king only, needs their king online)", NamedTextColor.DARK_RED));
+            }
+            inventory.setItem(i, builder.build());
         }
         inventory.setItem(49, new ItemBuilder(Material.BARRIER).name(Component.text("Back", NamedTextColor.YELLOW)).build());
 
@@ -103,7 +108,11 @@ public class RelationGui implements GuiHolder {
         }
         Kingdom other = others.get(slot);
         if (clickType == ClickType.SHIFT_RIGHT) {
-            plugin.getWarManager().declareWar(player, other);
+            if (Diplomacy.effectiveRelation(kingdom, other) == RelationType.WAR) {
+                plugin.getWarManager().surrender(player, other);
+            } else {
+                plugin.getWarManager().declareWar(player, other);
+            }
             player.closeInventory();
             return;
         }
