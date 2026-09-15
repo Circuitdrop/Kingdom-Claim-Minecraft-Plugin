@@ -115,6 +115,9 @@ gradle build
 The compiled plugin jar is written to `build/libs/KingdomClaim-<version>.jar`;
 drop it into your Paper 26.2 server's `plugins/` folder.
 
+See [CHANGELOG.md](CHANGELOG.md) for the full history of added and altered
+features.
+
 ## Data
 
 Kingdom data is stored in `plugins/KingdomClaim/kingdoms.yml`, autosaved on
