@@ -23,6 +23,11 @@ public class Kingdom {
     private final Map<UUID, RelationType> relations = new HashMap<>();
     private String home; // serialized ClaimChunk-style world;x;y;z;yaw;pitch, nullable
     private NamedTextColor color; // nullable; defaults to white when unset
+    // Per-claim "x;y;z;yaw;pitch" of wherever the claimer was standing when they claimed
+    // it, so the claims GUI can teleport back there instead of guessing a highest-block Y.
+    // A claim with no entry here (loaded from a save made before this existed) falls back
+    // to that highest-block guess.
+    private final Map<ClaimChunk, String> claimSpawns = new HashMap<>();
 
     public Kingdom(UUID id, String name, UUID founder) {
         this.id = id;
@@ -64,6 +69,10 @@ public class Kingdom {
 
     public Set<ClaimChunk> claims() {
         return claims;
+    }
+
+    public Map<ClaimChunk, String> claimSpawns() {
+        return claimSpawns;
     }
 
     public Map<UUID, RelationType> relations() {

@@ -27,7 +27,11 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   center, with click-to-teleport (toggleable, see below) and click-to-unclaim,
   plus a one-click "visualize all" that draws every claim's border in
   particles (visible only to you). `/kingdom map` renders a quick ASCII
-  ownership grid in chat.
+  ownership grid in chat. Both `/kingdom home` and claim-GUI teleports send
+  you to the exact spot you were standing when you set the home / claimed the
+  chunk — never a guessed highest-block-at-that-X/Z spawn (a claim made
+  before this existed falls back to that guess, since it has no exact spot
+  on record).
 - **Diplomacy, PvP & war raiding** — kingdoms declare ALLY / NEUTRAL / ENEMY
   towards each other instantly (command or the Relations GUI); ALLY needs
   both sides to agree, ENEMY takes effect the moment either side declares
@@ -104,4 +108,5 @@ on server shutdown. `config.yml` also has `max-claims-per-kingdom` (default
 200), `home-teleport-enabled` (default `true` — set `false` to disable
 `/kingdom home` server-wide; `/kingdom sethome` still works either way), and
 `claim-teleport-enabled` (default `true` — set `false` to disable teleporting
-to a claim by clicking it in the claims GUI).
+to a claim by clicking it in the claims GUI), and `allow-nether-claims`
+(default `false` — set `true` to allow `/kingdom claim` in the Nether).

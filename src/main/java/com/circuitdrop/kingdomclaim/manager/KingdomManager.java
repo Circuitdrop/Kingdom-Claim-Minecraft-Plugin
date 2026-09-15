@@ -5,6 +5,7 @@ import com.circuitdrop.kingdomclaim.model.Kingdom;
 import com.circuitdrop.kingdomclaim.model.Rank;
 import com.circuitdrop.kingdomclaim.model.RelationType;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -113,12 +114,14 @@ public class KingdomManager {
         teamManager.sync(kingdom);
     }
 
-    public boolean claimChunk(Kingdom kingdom, ClaimChunk chunk) {
+    /** claimLocation is stored verbatim so the claims GUI can teleport back to exactly where it was claimed from. */
+    public boolean claimChunk(Kingdom kingdom, ClaimChunk chunk, Location claimLocation) {
         if (kingdomByClaim.containsKey(chunk)) {
             return false;
         }
         kingdom.claims().add(chunk);
         kingdomByClaim.put(chunk, kingdom.id());
+        kingdom.claimSpawns().put(chunk, serializeSpawn(claimLocation));
         return true;
     }
 
@@ -127,7 +130,12 @@ public class KingdomManager {
             return false;
         }
         kingdomByClaim.remove(chunk);
+        kingdom.claimSpawns().remove(chunk);
         return true;
+    }
+
+    private String serializeSpawn(Location loc) {
+        return loc.getX() + ";" + loc.getY() + ";" + loc.getZ() + ";" + loc.getYaw() + ";" + loc.getPitch();
     }
 
     public void setRelation(Kingdom from, Kingdom to, RelationType type) {

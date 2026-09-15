@@ -16,6 +16,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -295,6 +296,11 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "Only officers and the king can claim land.");
             return;
         }
+        if (player.getWorld().getEnvironment() == World.Environment.NETHER
+                && !plugin.getConfig().getBoolean("allow-nether-claims", false)) {
+            Messages.error(player, "Claiming in the Nether is disabled on this server.");
+            return;
+        }
         ClaimChunk chunk = ClaimChunk.of(player.getLocation());
         Optional<Kingdom> existing = kingdoms.kingdomAt(chunk);
         if (existing.isPresent()) {
@@ -310,7 +316,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "Claims must be connected to your existing territory.");
             return;
         }
-        kingdoms.claimChunk(kingdom, chunk);
+        kingdoms.claimChunk(kingdom, chunk, player.getLocation());
         Messages.success(player, "Claimed chunk (" + chunk.x() + ", " + chunk.z() + ") for " + kingdom.name() + ".");
     }
 

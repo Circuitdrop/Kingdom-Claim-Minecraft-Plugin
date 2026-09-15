@@ -148,11 +148,22 @@ public class ClaimListGui implements GuiHolder {
             Messages.error(player, "That world is not currently loaded.");
             return;
         }
+        player.closeInventory();
+        player.teleportAsync(resolveTeleportLocation(world, claim));
+        Messages.success(player, "Teleported to claim (" + claim.x() + ", " + claim.z() + ").");
+    }
+
+    /** Prefers the exact spot the claim was claimed from; falls back to a highest-block guess for older claims. */
+    private Location resolveTeleportLocation(World world, ClaimChunk claim) {
+        String spawn = kingdom.claimSpawns().get(claim);
+        if (spawn != null) {
+            String[] parts = spawn.split(";");
+            return new Location(world, Double.parseDouble(parts[0]), Double.parseDouble(parts[1]),
+                    Double.parseDouble(parts[2]), Float.parseFloat(parts[3]), Float.parseFloat(parts[4]));
+        }
         int x = claim.centerBlockX();
         int z = claim.centerBlockZ();
         int y = world.getHighestBlockYAt(x, z) + 1;
-        player.closeInventory();
-        player.teleportAsync(new Location(world, x + 0.5, y, z + 0.5));
-        Messages.success(player, "Teleported to claim (" + claim.x() + ", " + claim.z() + ").");
+        return new Location(world, x + 0.5, y, z + 0.5);
     }
 }

@@ -12,3 +12,6 @@ home-teleport-enabled: true
 
 # Whether clicking a claim in the claims GUI teleports you to it.
 claim-teleport-enabled: true
+
+# Whether /kingdom claim can be used in the Nether.
+allow-nether-claims: false

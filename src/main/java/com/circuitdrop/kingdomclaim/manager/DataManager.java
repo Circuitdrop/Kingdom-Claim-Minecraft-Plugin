@@ -50,6 +50,7 @@ public class DataManager {
                 Kingdom kingdom = new Kingdom(id, name, id); // membership below overwrites this placeholder entry
                 readMembers(kingdom, section);
                 readClaims(kingdom, section);
+                readClaimSpawns(kingdom, section);
                 if (section.contains("home")) {
                     kingdom.setHome(section.getString("home"));
                 }
@@ -92,6 +93,17 @@ public class DataManager {
         }
     }
 
+    /** Older saves (from before per-claim spawns existed) simply have no entries here. */
+    private void readClaimSpawns(Kingdom kingdom, ConfigurationSection section) {
+        ConfigurationSection claimSpawns = section.getConfigurationSection("claim-spawns");
+        if (claimSpawns == null) {
+            return;
+        }
+        for (String key : claimSpawns.getKeys(false)) {
+            kingdom.claimSpawns().put(ClaimChunk.deserialize(key), claimSpawns.getString(key));
+        }
+    }
+
     private void readRelations(Kingdom kingdom, ConfigurationSection section) {
         ConfigurationSection relations = section.getConfigurationSection("relations");
         if (relations == null) {
@@ -119,6 +131,8 @@ public class DataManager {
             ConfigurationSection members = section.createSection("members");
             kingdom.members().forEach((uuid, rank) -> members.set(uuid.toString(), rank.name()));
             section.set("claims", kingdom.claims().stream().map(ClaimChunk::serialize).toList());
+            ConfigurationSection claimSpawns = section.createSection("claim-spawns");
+            kingdom.claimSpawns().forEach((chunk, spawn) -> claimSpawns.set(chunk.serialize(), spawn));
             ConfigurationSection relations = section.createSection("relations");
             kingdom.relations().forEach((uuid, type) -> relations.set(uuid.toString(), type.name()));
         }
