@@ -18,9 +18,10 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   standing in. Every claim after a kingdom's first must be edge-adjacent to
   one of its existing claims, so territory always stays one connected shape.
   At peace, only members of the owning kingdom may break or place any
-  block, use a bucket, or right-click anything in a claim (containers,
-  doors, buttons, all of it) — there's no officer-only carve-out for
-  everyday building.
+  block, use a bucket, right-click anything in a claim (containers,
+  doors, buttons, all of it), or trample farmland — jumping on crops to
+  pop them off doesn't work for non-members either — there's no
+  officer-only carve-out for everyday building.
 - **Claim visualization & management GUI** — `/kingdom gui` opens a menu for
   members, claims and relations; the claims screen paginates every claimed
   chunk, showing both its chunk coordinates and the block coordinates of its

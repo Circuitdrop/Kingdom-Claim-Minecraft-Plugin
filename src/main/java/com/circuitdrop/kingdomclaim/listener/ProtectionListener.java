@@ -20,6 +20,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -34,8 +35,9 @@ import java.util.UUID;
  * Enforces claim protection.
  * <p>
  * At peace, only members of the owning kingdom may break/place blocks,
- * use buckets, or right-click any block in a claim — there is no
- * officer-only carve-out for everyday building.
+ * use buckets, right-click any block, or trample farmland (crop trampling
+ * counts as griefing here too) in a claim — there is no officer-only
+ * carve-out for everyday building.
  * <p>
  * During an active WAR (see {@link WarManager}), the attacking kingdom's
  * members gain exactly one privilege inside the defender's claims: placing
@@ -180,6 +182,17 @@ public class ProtectionListener implements Listener {
             }
             return !ownerOpt.get().id().equals(auth.defenderKingdomId()); // only the declared target is breachable
         });
+    }
+
+    /** Covers farmland trampling (crops popping off when a non-member jumps on them) and similar player-caused block changes. */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (!canBuild(player, event.getBlock().getLocation())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
