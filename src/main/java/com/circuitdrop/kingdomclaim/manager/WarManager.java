@@ -8,10 +8,11 @@ import com.circuitdrop.kingdomclaim.util.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -19,9 +20,11 @@ import java.util.UUID;
  * a kingdom whose king is currently online, and it doesn't take effect until
  * a 30-minute notice period has elapsed. Nothing war-related (PvP, TNT
  * raiding) is active until {@link #startWar} actually writes the WAR
- * relation — a pending declaration grants no permissions on its own.
- * Either side's king can end an active war unilaterally via {@link #surrender},
- * which takes effect immediately with no notice period.
+ * relation — a pending declaration grants no permissions on its own, and
+ * the declaring king can call it off any time before then with
+ * {@link #cancelDeclaration}. Either side's king can end an active war
+ * unilaterally via {@link #surrender}, which takes effect immediately with
+ * no notice period.
  */
 public class WarManager {
 
@@ -29,7 +32,10 @@ public class WarManager {
 
     private final KingdomManager kingdoms;
     private final Plugin plugin;
-    private final Set<String> pendingDeclarations = new HashSet<>();
+    private final Map<String, PendingDeclaration> pendingDeclarations = new HashMap<>();
+
+    private record PendingDeclaration(UUID attackerId, BukkitTask task) {
+    }
 
     public WarManager(KingdomManager kingdoms, Plugin plugin) {
         this.kingdoms = kingdoms;
@@ -60,7 +66,7 @@ public class WarManager {
             return;
         }
         String key = pairKey(attacker.id(), target.id());
-        if (pendingDeclarations.contains(key)) {
+        if (pendingDeclarations.containsKey(key)) {
             Messages.error(declarer, "A war declaration against " + target.name() + " is already pending.");
             return;
         }
@@ -71,14 +77,43 @@ public class WarManager {
             return;
         }
 
-        pendingDeclarations.add(key);
         broadcastToKingdom(attacker, attacker.name() + " has declared war on " + target.name()
                 + "! Fighting begins in 30 minutes.");
         broadcastToKingdom(target, attacker.name() + " has declared war on your kingdom! Defend your claims — fighting begins in 30 minutes.");
 
         UUID attackerId = attacker.id();
         UUID targetId = target.id();
-        Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(attackerId, targetId, key), DECLARATION_NOTICE_TICKS);
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(attackerId, targetId, key), DECLARATION_NOTICE_TICKS);
+        pendingDeclarations.put(key, new PendingDeclaration(attackerId, task));
+    }
+
+    /** Only the king of the kingdom that declared the war may call it off, and only before it starts. */
+    public void cancelDeclaration(Player player, Kingdom target) {
+        Optional<Kingdom> ownOpt = kingdoms.kingdomOf(player.getUniqueId());
+        if (ownOpt.isEmpty()) {
+            Messages.error(player, "You are not in a kingdom.");
+            return;
+        }
+        Kingdom own = ownOpt.get();
+        if (own.rankOf(player.getUniqueId()) != Rank.KING) {
+            Messages.error(player, "Only the king can cancel a war declaration.");
+            return;
+        }
+        String key = pairKey(own.id(), target.id());
+        PendingDeclaration pending = pendingDeclarations.get(key);
+        if (pending == null) {
+            Messages.error(player, "There is no pending war declaration between your kingdoms.");
+            return;
+        }
+        if (!pending.attackerId().equals(own.id())) {
+            Messages.error(player, "Only the kingdom that declared the war can cancel it.");
+            return;
+        }
+        pendingDeclarations.remove(key);
+        pending.task().cancel();
+        String message = own.name() + " has called off its war declaration against " + target.name() + ".";
+        broadcastToKingdom(own, message);
+        broadcastToKingdom(target, message);
     }
 
     /**

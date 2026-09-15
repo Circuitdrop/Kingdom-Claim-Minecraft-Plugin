@@ -7,11 +7,15 @@ import net.kyori.adventure.text.format.NamedTextColor;
  * one-directional declarations reconciled by {@code Diplomacy} (ALLY needs both
  * sides to agree; ENEMY takes effect unilaterally). WAR is never set directly —
  * only {@code WarManager} writes it, after its declare-war gating and notice delay.
+ * <p>
+ * ENEMY is purely a diplomatic signal: it grants no combat or raiding rights
+ * of its own. Wilderness PvP is already unrestricted for everyone regardless
+ * of relation, so ENEMY has no claim-interior effect either — only WAR does.
  */
 public enum RelationType {
     ALLY(NamedTextColor.GREEN, false, false),
     NEUTRAL(NamedTextColor.YELLOW, false, false),
-    ENEMY(NamedTextColor.RED, true, false),
+    ENEMY(NamedTextColor.RED, false, false),
     WAR(NamedTextColor.DARK_RED, true, true);
 
     private final NamedTextColor color;
@@ -28,7 +32,7 @@ public enum RelationType {
         return color;
     }
 
-    /** Whether members of the two kingdoms may fight each other, including inside claims. */
+    /** Whether members of the two kingdoms may fight each other inside a claim (only true for WAR). */
     public boolean pvpAllowed() {
         return pvpAllowed;
     }

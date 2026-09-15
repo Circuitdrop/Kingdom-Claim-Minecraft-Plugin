@@ -40,7 +40,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
     private static final List<String> SUBCOMMANDS = List.of(
             "create", "disband", "invite", "accept", "deny", "invites", "leave", "kick",
             "promote", "demote", "transfer", "claim", "unclaim", "map", "visualize", "gui",
-            "relation", "declarewar", "surrender", "color", "chat", "sethome", "home", "info", "list", "admin", "help");
+            "relation", "declarewar", "canceldeclare", "surrender", "color", "chat", "sethome", "home", "info", "list", "admin", "help");
 
     private final KingdomClaimPlugin plugin;
     private final KingdomManager kingdoms;
@@ -82,6 +82,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             case "gui" -> requirePlayer(sender, this::openGui);
             case "relation" -> requirePlayer(sender, p -> relation(p, rest));
             case "declarewar" -> requirePlayer(sender, p -> declareWar(p, rest));
+            case "canceldeclare" -> requirePlayer(sender, p -> cancelDeclareWar(p, rest));
             case "surrender" -> requirePlayer(sender, p -> surrender(p, rest));
             case "color" -> requirePlayer(sender, p -> setColor(p, rest));
             case "chat" -> requirePlayer(sender, this::toggleChat);
@@ -415,6 +416,19 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
         warManager.declareWar(player, targetOpt.get());
     }
 
+    private void cancelDeclareWar(Player player, String[] args) {
+        if (args.length < 1) {
+            Messages.error(player, "Usage: /kingdom canceldeclare <kingdom>");
+            return;
+        }
+        Optional<Kingdom> targetOpt = kingdoms.byName(args[0]);
+        if (targetOpt.isEmpty()) {
+            Messages.error(player, "Unknown kingdom: " + args[0]);
+            return;
+        }
+        warManager.cancelDeclaration(player, targetOpt.get());
+    }
+
     private void surrender(Player player, String[] args) {
         if (args.length < 1) {
             Messages.error(player, "Usage: /kingdom surrender <kingdom>");
@@ -606,7 +620,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender) {
         Messages.info(sender, "KingdomClaim commands: /kingdom <create|disband|invite|accept|deny|invites|leave|kick|"
-                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|declarewar|surrender|color|chat|sethome|home|info|list>");
+                + "promote|demote|transfer|claim|unclaim|map|visualize|gui|relation|declarewar|canceldeclare|surrender|color|chat|sethome|home|info|list>");
     }
 
     @Override
@@ -620,7 +634,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             String sub = args[0].toLowerCase();
             return switch (sub) {
                 case "invite", "kick", "promote", "demote", "transfer" -> onlinePlayerNames(args[1]);
-                case "accept", "deny", "info", "declarewar", "surrender" -> kingdomNames(args[1]);
+                case "accept", "deny", "info", "declarewar", "canceldeclare", "surrender" -> kingdomNames(args[1]);
                 case "relation" -> Stream.of("ally", "neutral", "enemy")
                         .filter(s -> s.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());

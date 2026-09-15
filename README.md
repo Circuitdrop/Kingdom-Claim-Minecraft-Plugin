@@ -19,9 +19,11 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   one of its existing claims, so territory always stays one connected shape.
   At peace, only members of the owning kingdom may break or place any
   block, use a bucket, right-click anything in a claim (containers,
-  doors, buttons, all of it), or trample farmland — jumping on crops to
-  pop them off doesn't work for non-members either — there's no
-  officer-only carve-out for everyday building.
+  doors, buttons, all of it), trample farmland — jumping on crops to
+  pop them off doesn't work for non-members either — change an item
+  frame's item, or kill a farm animal — there's no officer-only
+  carve-out for everyday building. Animal-killing opens up to attackers
+  during an active war (see below); item frames never do.
 - **Claim visualization & management GUI** — `/kingdom gui` opens a menu for
   members, claims and relations; the claims screen paginates every claimed
   chunk, showing both its chunk coordinates and the block coordinates of its
@@ -36,10 +38,13 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
 - **Diplomacy, PvP & war raiding** — kingdoms declare ALLY / NEUTRAL / ENEMY
   towards each other instantly (command or the Relations GUI); ALLY needs
   both sides to agree, ENEMY takes effect the moment either side declares
-  it and opens PvP. WAR is a heavier, gated declaration (see below) that
-  additionally lets the attacker breach the defender's claims with TNT —
-  and only TNT: no other block may be broken, placed, or interacted with
-  by a non-member, war or not.
+  it. ENEMY is a diplomatic signal only, though — it does not by itself let
+  you attack someone inside their own claim (wilderness PvP is already
+  unrestricted for everyone regardless of relation). WAR is the only
+  relation that opens claim-interior PvP, and is a heavier, gated
+  declaration (see below) that additionally lets the attacker breach the
+  defender's claims with TNT — and only TNT: no other block may be broken,
+  placed, or interacted with by a non-member, war or not.
 
   **Declaring war** (`/kingdom declarewar <kingdom>` or the Relations GUI):
   - Only the king of the declaring kingdom may declare war (as with setting
@@ -48,6 +53,9 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   - War doesn't start immediately: there's a 30-minute notice period during
     which nothing war-related is active (no raiding, no forced PvP) —
     both kingdoms are notified when it's declared and again when it begins.
+  - The declaring king can call it off any time before then with
+    `/kingdom canceldeclare <kingdom>` — nobody else can (not the defender,
+    not an officer); doing so notifies both kingdoms and the war never starts.
   - Once active, the attacking kingdom's members may place and light TNT
     inside the defender's claims — nothing else. They still cannot break
     blocks directly, open doors/containers, or place anything but TNT;
@@ -87,6 +95,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `gui` | Open the kingdom management menu |
 | `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
 | `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
+| `canceldeclare <kingdom>` | Call off your own pending war declaration before it starts (king only) |
 | `surrender <kingdom>` | End an active war immediately (king only, either side) |
 | `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |

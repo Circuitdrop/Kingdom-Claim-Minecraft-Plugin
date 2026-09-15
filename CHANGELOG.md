@@ -38,6 +38,14 @@ the plugin's full history so far, oldest first.
 - **Surrender claim-loss penalty**: surrendering costs the surrendering
   kingdom a percentage of its claimed chunks (config-controlled), plus a
   matching reduction to its claim limit until an admin lifts it.
+- **`/kingdom canceldeclare`**: the declaring king can call off a pending
+  war declaration any time before its 30-minute notice period elapses;
+  notifies both kingdoms and the war never starts.
+- **Item frame protection**: non-members can no longer place, rotate, or
+  remove an item frame's item in a claim, war or not.
+- **Animal protection**: non-members can no longer kill farm animals
+  (cows, pigs, sheep, chickens, etc.) in a claim at peace; this opens up
+  to the attacker during an active war, same as PvP.
 
 ## Altered
 
@@ -68,6 +76,10 @@ the plugin's full history so far, oldest first.
 - **Claim teleporting made independently toggleable**
   (`claim-teleport-enabled`) from the kingdom-home teleport toggle
   (`home-teleport-enabled`).
+- **Enemy no longer grants claim-interior PvP rights**: declaring a kingdom
+  ENEMY is now a pure diplomatic signal — it no longer lets you attack their
+  members inside their own claims. Only an active WAR does; wilderness PvP
+  was already unrestricted for everyone regardless of relation.
 
 ## Commands
 
@@ -91,6 +103,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `gui` | Open the kingdom management menu |
 | `relation <ally\|neutral\|enemy> <kingdom>` | Set your kingdom's stance towards another (king only) |
 | `declarewar <kingdom>` | Declare war (king only, defender's king must be online, 30 min notice) |
+| `canceldeclare <kingdom>` | Call off your own pending war declaration before it starts (king only) |
 | `surrender <kingdom>` | End an active war immediately, at a claim-loss cost (king only, either side) |
 | `color <color>` | Set your kingdom's color (king only) — tab-completes valid names |
 | `chat` | Toggle kingdom-only chat |

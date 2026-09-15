@@ -8,9 +8,11 @@ import com.circuitdrop.kingdomclaim.model.Kingdom;
 import com.circuitdrop.kingdomclaim.model.RelationType;
 import com.circuitdrop.kingdomclaim.util.Diplomacy;
 import com.circuitdrop.kingdomclaim.util.Messages;
+import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,9 +37,11 @@ import java.util.UUID;
  * Enforces claim protection.
  * <p>
  * At peace, only members of the owning kingdom may break/place blocks,
- * use buckets, right-click any block, or trample farmland (crop trampling
- * counts as griefing here too) in a claim — there is no officer-only
- * carve-out for everyday building.
+ * use buckets, right-click any block, trample farmland (crop trampling
+ * counts as griefing here too), change an item frame's item, or kill a
+ * farm animal in a claim — there is no officer-only carve-out for everyday
+ * building. Animal-killing is the one exception that opens up during an
+ * active WAR too (see below); item frames do not.
  * <p>
  * During an active WAR (see {@link WarManager}), the attacking kingdom's
  * members gain exactly one privilege inside the defender's claims: placing
@@ -127,6 +131,15 @@ public class ProtectionListener implements Listener {
         }
         event.setCancelled(true);
         Messages.error(player, "This land belongs to another kingdom.");
+    }
+
+    /** Non-members can't place, rotate, or remove an item frame's item. */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onItemFrameChange(PlayerItemFrameChangeEvent event) {
+        if (!canBuild(event.getPlayer(), event.getItemFrame().getLocation())) {
+            event.setCancelled(true);
+            Messages.error(event.getPlayer(), "This land belongs to another kingdom.");
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -223,6 +236,33 @@ public class ProtectionListener implements Listener {
             event.setCancelled(true);
             Messages.error(attacker, "PvP is disabled here — your kingdom is not at war with " + owner.get().name() + ".");
         }
+    }
+
+    /** Farm animals can't be killed by non-members in a claim, except during an active war. */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onAnimalDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Animals)) {
+            return;
+        }
+        Player attacker = resolveAttacker(event);
+        if (attacker == null) {
+            return;
+        }
+        if (playerData.isBypassing(attacker.getUniqueId())) {
+            return;
+        }
+        Optional<Kingdom> owner = kingdoms.kingdomAt(ClaimChunk.of(event.getEntity().getLocation()));
+        if (owner.isEmpty()) {
+            return; // wilderness: unrestricted
+        }
+        if (owner.get().isMember(attacker.getUniqueId())) {
+            return;
+        }
+        if (atWarWith(attacker, owner.get())) {
+            return; // war: animals are fair game too
+        }
+        event.setCancelled(true);
+        Messages.error(attacker, "This land belongs to another kingdom.");
     }
 
     private Player resolveAttacker(EntityDamageByEntityEvent event) {
