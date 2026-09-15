@@ -2,9 +2,10 @@
 
 All notable changes to KingdomClaim are tracked here, split into what was
 **Added** (new capability) and what was later **Altered** (changed behavior
-of something already shipped). Everything below is currently on version
-`1.0.0` — nothing has had a version bump yet, so this reads top-to-bottom as
-the plugin's full history so far, oldest first.
+of something already shipped). Current version: `1.1.0`. Everything through
+that bump reads top-to-bottom as the plugin's full history so far, oldest
+first; every update from here on gets its own version bump in
+`build.gradle.kts` (which also names the built jar).
 
 ## Added
 
