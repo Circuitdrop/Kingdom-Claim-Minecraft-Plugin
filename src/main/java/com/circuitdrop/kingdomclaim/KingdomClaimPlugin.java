@@ -29,7 +29,7 @@ public final class KingdomClaimPlugin extends JavaPlugin {
         dataManager.load(kingdomManager);
         warManager = new WarManager(kingdomManager, this);
 
-        getServer().getPluginManager().registerEvents(new ProtectionListener(kingdomManager, playerDataManager, warManager), this);
+        getServer().getPluginManager().registerEvents(new ProtectionListener(kingdomManager, playerDataManager, warManager, this), this);
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
         getServer().getPluginManager().registerEvents(new KingdomChatListener(kingdomManager, playerDataManager), this);
         getServer().getPluginManager().registerEvents(new PlayerLifecycleListener(kingdomManager, playerDataManager), this);

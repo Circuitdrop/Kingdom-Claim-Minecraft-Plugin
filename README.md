@@ -57,8 +57,9 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
     `/kingdom canceldeclare <kingdom>` — nobody else can (not the defender,
     not an officer); doing so notifies both kingdoms and the war never starts.
   - Once active, the attacking kingdom's members may place and light TNT
-    inside the defender's claims — nothing else. They still cannot break
-    blocks directly, open doors/containers, or place anything but TNT;
+    inside the defender's claims, and (config-controlled, see below) place
+    cobwebs to slow defenders down — nothing else. They still cannot break
+    blocks directly, open doors/containers, or place anything but those two;
     the only way in is blowing a way in. Each authorized TNT explosion only
     damages that specific defender's claims — other kingdoms' land, and any
     explosion not tied to an authorized war TNT (creepers, stray TNT, etc.),
@@ -136,6 +137,9 @@ on server shutdown. `config.yml` also has `max-claims-per-kingdom` (default
 `/kingdom home` server-wide; `/kingdom sethome` still works either way), and
 `claim-teleport-enabled` (default `true` — set `false` to disable teleporting
 to a claim by clicking it in the claims GUI), `allow-nether-claims`
-(default `false` — set `true` to allow `/kingdom claim` in the Nether), and
+(default `false` — set `true` to allow `/kingdom claim` in the Nether),
 `surrender-claim-loss-percent` (default `20` — the percentage of claims a
-kingdom loses when its king surrenders a war, see above).
+kingdom loses when its king surrenders a war, see above), and
+`war-cobwebs-enabled` (default `true` — set `false` to stop attackers from
+placing cobwebs in a defender's claim during an active war; TNT is
+unaffected by this toggle).

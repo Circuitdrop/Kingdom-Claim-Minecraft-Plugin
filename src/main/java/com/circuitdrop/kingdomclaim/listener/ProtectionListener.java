@@ -27,6 +27,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,13 +45,14 @@ import java.util.UUID;
  * active WAR too (see below); item frames do not.
  * <p>
  * During an active WAR (see {@link WarManager}), the attacking kingdom's
- * members gain exactly one privilege inside the defender's claims: placing
- * and lighting TNT. They can still not break blocks directly, interact with
- * anything, or place any other block — the only way in is blowing a way in.
- * TNT placed/lit under that privilege is tagged so only its own blast (and
- * only against that specific defender's claims) is allowed to remove blocks;
- * every other explosion inside a claim (creepers, unrelated TNT, blast
- * spill onto an unrelated claim) is neutralized.
+ * members gain privileges inside the defender's claims: placing and lighting
+ * TNT, and (if {@code war-cobwebs-enabled} in config.yml, default true)
+ * placing cobwebs to slow defenders down. They can still not break blocks
+ * directly, interact with anything, or place any other block — the only way
+ * in is blowing a way in. TNT placed/lit under that privilege is tagged so
+ * only its own blast (and only against that specific defender's claims) is
+ * allowed to remove blocks; every other explosion inside a claim (creepers,
+ * unrelated TNT, blast spill onto an unrelated claim) is neutralized.
  */
 public class ProtectionListener implements Listener {
 
@@ -59,12 +61,14 @@ public class ProtectionListener implements Listener {
     private final KingdomManager kingdoms;
     private final PlayerDataManager playerData;
     private final WarManager warManager;
+    private final Plugin plugin;
     private final Map<Block, RaidAuthorization> raidAuthorizations = new HashMap<>();
 
-    public ProtectionListener(KingdomManager kingdoms, PlayerDataManager playerData, WarManager warManager) {
+    public ProtectionListener(KingdomManager kingdoms, PlayerDataManager playerData, WarManager warManager, Plugin plugin) {
         this.kingdoms = kingdoms;
         this.playerData = playerData;
         this.warManager = warManager;
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -99,7 +103,10 @@ public class ProtectionListener implements Listener {
             return;
         }
         if (block.getType() == Material.TNT && atWarWith(player, owner)) {
-            return; // sole exception: attackers may place TNT during an active war
+            return; // attackers may place TNT during an active war
+        }
+        if (block.getType() == Material.COBWEB && warCobwebsEnabled() && atWarWith(player, owner)) {
+            return; // attackers may also place cobwebs during an active war, if enabled
         }
         event.setCancelled(true);
         Messages.error(player, "This land belongs to another kingdom.");
@@ -279,6 +286,10 @@ public class ProtectionListener implements Listener {
     private boolean atWarWith(Player player, Kingdom owner) {
         Optional<Kingdom> attackerKingdom = kingdoms.kingdomOf(player.getUniqueId());
         return attackerKingdom.isPresent() && warManager.isActiveWar(attackerKingdom.get(), owner);
+    }
+
+    private boolean warCobwebsEnabled() {
+        return plugin.getConfig().getBoolean("war-cobwebs-enabled", true);
     }
 
     /** True if the player may break/place blocks or use buckets at the given location. */

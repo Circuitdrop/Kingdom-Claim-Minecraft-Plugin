@@ -22,3 +22,7 @@ allow-nether-claims: false
 # max-claims-per-kingdom for that kingdom until an admin lifts the penalty
 # with /kingdom admin resetpenalty <kingdom>.
 surrender-claim-loss-percent: 20
+
+# Whether an attacking kingdom's members may place cobwebs (to slow down
+# defenders) inside the defender's claims during an active war, alongside TNT.
+war-cobwebs-enabled: true

@@ -46,6 +46,9 @@ the plugin's full history so far, oldest first.
 - **Animal protection**: non-members can no longer kill farm animals
   (cows, pigs, sheep, chickens, etc.) in a claim at peace; this opens up
   to the attacker during an active war, same as PvP.
+- **War cobwebs**: attackers may now also place cobwebs (not just TNT)
+  inside the defender's claims during an active war, to slow defenders
+  down; toggleable via `war-cobwebs-enabled` in config.yml (default `true`).
 
 ## Altered
 
@@ -124,3 +127,4 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `claim-teleport-enabled` | `true` | Whether clicking a claim in the GUI teleports you |
 | `allow-nether-claims` | `false` | Whether `/kingdom claim` works in the Nether |
 | `surrender-claim-loss-percent` | `20` | % of claims lost, edge-first, on surrender |
+| `war-cobwebs-enabled` | `true` | Whether attackers may place cobwebs (alongside TNT) in a defender's claim during war |
