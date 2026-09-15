@@ -28,6 +28,10 @@ public class Kingdom {
     // A claim with no entry here (loaded from a save made before this existed) falls back
     // to that highest-block guess.
     private final Map<ClaimChunk, String> claimSpawns = new HashMap<>();
+    // Chunks subtracted from max-claims-per-kingdom as a war-surrender penalty,
+    // on top of whatever chunks were actually stripped. Only an admin can clear it
+    // (/kingdom admin resetpenalty), which is the point - it isn't self-service.
+    private int claimCapPenalty;
 
     public Kingdom(UUID id, String name, UUID founder) {
         this.id = id;
@@ -101,5 +105,13 @@ public class Kingdom {
 
     public void setColor(NamedTextColor color) {
         this.color = color;
+    }
+
+    public int claimCapPenalty() {
+        return claimCapPenalty;
+    }
+
+    public void setClaimCapPenalty(int claimCapPenalty) {
+        this.claimCapPenalty = claimCapPenalty;
     }
 }

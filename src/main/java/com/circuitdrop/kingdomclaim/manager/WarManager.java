@@ -81,8 +81,13 @@ public class WarManager {
         Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(attackerId, targetId, key), DECLARATION_NOTICE_TICKS);
     }
 
-    /** Either side of a war can end it unilaterally; resets both directions to NEUTRAL. */
-    public void surrender(Player player, Kingdom target) {
+    /**
+     * Either side of a war can end it unilaterally; resets both directions to
+     * NEUTRAL and strips claimLossPercent% of the surrendering kingdom's claims
+     * (from its territory's edges inward) as a penalty - see
+     * {@link KingdomManager#applySurrenderPenalty}.
+     */
+    public void surrender(Player player, Kingdom target, int claimLossPercent) {
         Optional<Kingdom> ownOpt = kingdoms.kingdomOf(player.getUniqueId());
         if (ownOpt.isEmpty()) {
             Messages.error(player, "You are not in a kingdom.");
@@ -103,7 +108,12 @@ public class WarManager {
         }
         kingdoms.setRelation(own, target, RelationType.NEUTRAL);
         kingdoms.setRelation(target, own, RelationType.NEUTRAL);
+        int lost = kingdoms.applySurrenderPenalty(own, claimLossPercent);
         String message = own.name() + " has surrendered to " + target.name() + ". The war is over.";
+        if (lost > 0) {
+            message += " " + own.name() + " ceded " + lost + " border chunk(s) and its claim limit is"
+                    + " reduced until an admin lifts the penalty.";
+        }
         broadcastToKingdom(own, message);
         broadcastToKingdom(target, message);
     }

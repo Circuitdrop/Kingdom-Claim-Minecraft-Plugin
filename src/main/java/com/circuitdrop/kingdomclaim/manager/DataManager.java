@@ -57,6 +57,7 @@ public class DataManager {
                 if (section.contains("color")) {
                     kingdom.setColor(NamedTextColor.NAMES.value(section.getString("color")));
                 }
+                kingdom.setClaimCapPenalty(section.getInt("claim-cap-penalty", 0));
                 manager.register(kingdom);
             } catch (Exception e) {
                 plugin.getLogger().log(Level.WARNING, "Failed to load kingdom entry '" + idKey + "'", e);
@@ -127,6 +128,9 @@ public class DataManager {
             }
             if (kingdom.color() != null) {
                 section.set("color", NamedTextColor.NAMES.key(kingdom.color()));
+            }
+            if (kingdom.claimCapPenalty() != 0) {
+                section.set("claim-cap-penalty", kingdom.claimCapPenalty());
             }
             ConfigurationSection members = section.createSection("members");
             kingdom.members().forEach((uuid, rank) -> members.set(uuid.toString(), rank.name()));

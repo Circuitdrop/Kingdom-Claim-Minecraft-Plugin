@@ -109,7 +109,8 @@ public class RelationGui implements GuiHolder {
         Kingdom other = others.get(slot);
         if (clickType == ClickType.SHIFT_RIGHT) {
             if (Diplomacy.effectiveRelation(kingdom, other) == RelationType.WAR) {
-                plugin.getWarManager().surrender(player, other);
+                int lossPercent = plugin.getConfig().getInt("surrender-claim-loss-percent", 20);
+                plugin.getWarManager().surrender(player, other, lossPercent);
             } else {
                 plugin.getWarManager().declareWar(player, other);
             }

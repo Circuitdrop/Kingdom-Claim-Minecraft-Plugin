@@ -308,7 +308,7 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "This chunk is already claimed by " + existing.get().name() + ".");
             return;
         }
-        int maxClaims = plugin.getConfig().getInt("max-claims-per-kingdom", 200);
+        int maxClaims = Math.max(0, plugin.getConfig().getInt("max-claims-per-kingdom", 200) - kingdom.claimCapPenalty());
         if (kingdom.claims().size() >= maxClaims) {
             Messages.error(player, "Your kingdom has reached its claim limit (" + maxClaims + ").");
             return;
@@ -425,7 +425,8 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "Unknown kingdom: " + args[0]);
             return;
         }
-        warManager.surrender(player, targetOpt.get());
+        int lossPercent = plugin.getConfig().getInt("surrender-claim-loss-percent", 20);
+        warManager.surrender(player, targetOpt.get(), lossPercent);
     }
 
     private void setColor(Player player, String[] args) {
@@ -550,12 +551,32 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "You don't have permission to do that.");
             return;
         }
+        if (args.length >= 1 && args[0].equalsIgnoreCase("resetpenalty")) {
+            adminResetPenalty(player, args);
+            return;
+        }
         if (args.length < 1 || !args[0].equalsIgnoreCase("bypass")) {
-            Messages.error(player, "Usage: /kingdom admin bypass");
+            Messages.error(player, "Usage: /kingdom admin <bypass|resetpenalty>");
             return;
         }
         boolean nowEnabled = playerData.toggleBypass(player.getUniqueId());
         Messages.success(player, "Protection bypass " + (nowEnabled ? "enabled" : "disabled") + ".");
+    }
+
+    private void adminResetPenalty(Player player, String[] args) {
+        if (args.length < 2) {
+            Messages.error(player, "Usage: /kingdom admin resetpenalty <kingdom>");
+            return;
+        }
+        Optional<Kingdom> targetOpt = kingdoms.byName(args[1]);
+        if (targetOpt.isEmpty()) {
+            Messages.error(player, "Unknown kingdom: " + args[1]);
+            return;
+        }
+        Kingdom target = targetOpt.get();
+        int previous = target.claimCapPenalty();
+        target.setClaimCapPenalty(0);
+        Messages.success(player, "Cleared " + target.name() + "'s claim limit penalty (was " + previous + ").");
     }
 
     // ---- helpers ----
@@ -606,10 +627,16 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
                 case "color" -> colorNames().stream()
                         .filter(s -> s.startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
+                case "admin" -> Stream.of("bypass", "resetpenalty")
+                        .filter(s -> s.startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
                 default -> List.of();
             };
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("relation")) {
+            return kingdomNames(args[2]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("resetpenalty")) {
             return kingdomNames(args[2]);
         }
         return List.of();

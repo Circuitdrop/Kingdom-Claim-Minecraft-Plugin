@@ -138,6 +138,46 @@ public class KingdomManager {
         return loc.getX() + ";" + loc.getY() + ";" + loc.getZ() + ";" + loc.getYaw() + ";" + loc.getPitch();
     }
 
+    /**
+     * War-surrender penalty: strips lossPercent% of a kingdom's claims, removing
+     * the most exposed (fewest same-kingdom neighbors) chunk first and recomputing
+     * after each removal so territory erodes from its edges inward. The number of
+     * chunks actually removed is also locked out of the kingdom's future claim
+     * limit until an admin clears it with {@code /kingdom admin resetpenalty}.
+     * Returns how many chunks were removed.
+     */
+    public int applySurrenderPenalty(Kingdom kingdom, int lossPercent) {
+        int lossCount = Math.round(kingdom.claims().size() * (lossPercent / 100f));
+        int removed = 0;
+        for (int i = 0; i < lossCount; i++) {
+            ClaimChunk mostExposed = mostExposedClaim(kingdom);
+            if (mostExposed == null) {
+                break;
+            }
+            unclaimChunk(kingdom, mostExposed);
+            removed++;
+        }
+        kingdom.setClaimCapPenalty(kingdom.claimCapPenalty() + removed);
+        return removed;
+    }
+
+    private ClaimChunk mostExposedClaim(Kingdom kingdom) {
+        ClaimChunk mostExposed = null;
+        int fewestNeighbors = Integer.MAX_VALUE;
+        for (ClaimChunk chunk : kingdom.claims()) {
+            int neighbors = 0;
+            if (kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x() + 1, chunk.z()))) neighbors++;
+            if (kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x() - 1, chunk.z()))) neighbors++;
+            if (kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x(), chunk.z() + 1))) neighbors++;
+            if (kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x(), chunk.z() - 1))) neighbors++;
+            if (neighbors < fewestNeighbors) {
+                fewestNeighbors = neighbors;
+                mostExposed = chunk;
+            }
+        }
+        return mostExposed;
+    }
+
     public void setRelation(Kingdom from, Kingdom to, RelationType type) {
         from.relations().put(to.id(), type);
     }

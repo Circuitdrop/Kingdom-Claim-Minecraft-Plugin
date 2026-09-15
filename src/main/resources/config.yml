@@ -15,3 +15,10 @@ claim-teleport-enabled: true
 
 # Whether /kingdom claim can be used in the Nether.
 allow-nether-claims: false
+
+# Percentage (0-100) of a kingdom's claimed chunks it loses, starting from the
+# edges of its territory and working inward, when its king surrenders a war
+# with /kingdom surrender. That many chunks are also locked out of
+# max-claims-per-kingdom for that kingdom until an admin lifts the penalty
+# with /kingdom admin resetpenalty <kingdom>.
+surrender-claim-loss-percent: 20

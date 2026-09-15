@@ -60,6 +60,13 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
     doubles as the declare-war button when you're not already at war with
     them). Surrendering resets the relation to neutral for both kingdoms
     immediately — no notice period, unlike declaring.
+  - Surrendering costs the surrendering kingdom territory: it loses
+    `surrender-claim-loss-percent` (default 20%) of its claimed chunks,
+    stripped from the edges of its territory inward (the most exposed chunk
+    goes first, recalculated after each one, so it erodes like a coastline
+    rather than leaving holes in the middle). That many chunks also come off
+    its claim limit — it can't just re-claim them back — until an admin
+    lifts the penalty with `/kingdom admin resetpenalty <kingdom>`.
 
 ## Commands
 
@@ -87,6 +94,7 @@ All subcommands live under `/kingdom` (aliases: `/k`, `/kd`).
 | `info [kingdom]` | Show kingdom stats |
 | `list` | List all kingdoms |
 | `admin bypass` | Toggle protection bypass (`kingdomclaim.admin`) |
+| `admin resetpenalty <kingdom>` | Clear a kingdom's surrender claim-limit penalty (`kingdomclaim.admin`) |
 
 ## Permissions
 
@@ -115,5 +123,7 @@ on server shutdown. `config.yml` also has `max-claims-per-kingdom` (default
 200), `home-teleport-enabled` (default `true` — set `false` to disable
 `/kingdom home` server-wide; `/kingdom sethome` still works either way), and
 `claim-teleport-enabled` (default `true` — set `false` to disable teleporting
-to a claim by clicking it in the claims GUI), and `allow-nether-claims`
-(default `false` — set `true` to allow `/kingdom claim` in the Nether).
+to a claim by clicking it in the claims GUI), `allow-nether-claims`
+(default `false` — set `true` to allow `/kingdom claim` in the Nether), and
+`surrender-claim-loss-percent` (default `20` — the percentage of claims a
+kingdom loses when its king surrenders a war, see above).
