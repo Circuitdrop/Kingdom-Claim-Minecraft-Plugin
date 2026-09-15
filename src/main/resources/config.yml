@@ -9,3 +9,6 @@ max-claims-per-kingdom: 200
 # Whether players can teleport to their kingdom's home with /kingdom home.
 # Setting a home with /kingdom sethome is always allowed regardless of this.
 home-teleport-enabled: true
+
+# Whether clicking a claim in the claims GUI teleports you to it.
+claim-teleport-enabled: true

@@ -62,7 +62,9 @@ public class ClaimListGui implements GuiHolder {
         for (int i = from; i < to; i++) {
             ClaimChunk claim = claims.get(i);
             inventory.setItem(i - from, new ItemBuilder(Material.GRASS_BLOCK)
-                    .name(Component.text(claim.world() + " (" + claim.x() + ", " + claim.z() + ")", NamedTextColor.WHITE))
+                    .name(Component.text(claim.world(), NamedTextColor.WHITE))
+                    .lore(Component.text("Chunk: (" + claim.x() + ", " + claim.z() + ")", NamedTextColor.GRAY))
+                    .lore(Component.text("Center: (" + claim.centerBlockX() + ", " + claim.centerBlockZ() + ")", NamedTextColor.GRAY))
                     .lore(Component.text("Left-click: teleport", NamedTextColor.GRAY))
                     .lore(Component.text("Shift-click: unclaim (officer+)", NamedTextColor.GRAY))
                     .build());
@@ -137,6 +139,10 @@ public class ClaimListGui implements GuiHolder {
     }
 
     private void handleTeleport(Player player, ClaimChunk claim) {
+        if (!plugin.getConfig().getBoolean("claim-teleport-enabled", true)) {
+            Messages.error(player, "Teleporting to claims is disabled on this server.");
+            return;
+        }
         World world = Bukkit.getWorld(claim.world());
         if (world == null) {
             Messages.error(player, "That world is not currently loaded.");

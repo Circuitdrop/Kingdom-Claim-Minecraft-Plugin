@@ -306,8 +306,23 @@ public class KingdomCommand implements CommandExecutor, TabCompleter {
             Messages.error(player, "Your kingdom has reached its claim limit (" + maxClaims + ").");
             return;
         }
+        if (!isConnected(kingdom, chunk)) {
+            Messages.error(player, "Claims must be connected to your existing territory.");
+            return;
+        }
         kingdoms.claimChunk(kingdom, chunk);
         Messages.success(player, "Claimed chunk (" + chunk.x() + ", " + chunk.z() + ") for " + kingdom.name() + ".");
+    }
+
+    /** A kingdom's first claim can go anywhere; every claim after that must share an edge with an existing one. */
+    private boolean isConnected(Kingdom kingdom, ClaimChunk chunk) {
+        if (kingdom.claims().isEmpty()) {
+            return true;
+        }
+        return kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x() + 1, chunk.z()))
+                || kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x() - 1, chunk.z()))
+                || kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x(), chunk.z() + 1))
+                || kingdom.claims().contains(new ClaimChunk(chunk.world(), chunk.x(), chunk.z() - 1));
     }
 
     private void unclaim(Player player) {

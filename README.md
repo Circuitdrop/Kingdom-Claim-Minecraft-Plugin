@@ -15,15 +15,19 @@ ally) with other kingdoms — all backed by an in-game GUI as well as commands.
   next to their name everywhere it appears, so leadership is visible at a
   glance.
 - **Claiming & protection** — officers+ claim/unclaim the chunk they're
-  standing in. At peace, only members of the owning kingdom may break or
-  place any block, use a bucket, or right-click anything in a claim
-  (containers, doors, buttons, all of it) — there's no officer-only
-  carve-out for everyday building.
+  standing in. Every claim after a kingdom's first must be edge-adjacent to
+  one of its existing claims, so territory always stays one connected shape.
+  At peace, only members of the owning kingdom may break or place any
+  block, use a bucket, or right-click anything in a claim (containers,
+  doors, buttons, all of it) — there's no officer-only carve-out for
+  everyday building.
 - **Claim visualization & management GUI** — `/kingdom gui` opens a menu for
   members, claims and relations; the claims screen paginates every claimed
-  chunk with click-to-teleport and click-to-unclaim, plus a one-click
-  "visualize all" that draws every claim's border in particles (visible only
-  to you). `/kingdom map` renders a quick ASCII ownership grid in chat.
+  chunk, showing both its chunk coordinates and the block coordinates of its
+  center, with click-to-teleport (toggleable, see below) and click-to-unclaim,
+  plus a one-click "visualize all" that draws every claim's border in
+  particles (visible only to you). `/kingdom map` renders a quick ASCII
+  ownership grid in chat.
 - **Diplomacy, PvP & war raiding** — kingdoms declare ALLY / NEUTRAL / ENEMY
   towards each other instantly (command or the Relations GUI); ALLY needs
   both sides to agree, ENEMY takes effect the moment either side declares
@@ -97,5 +101,7 @@ drop it into your Paper 26.2 server's `plugins/` folder.
 Kingdom data is stored in `plugins/KingdomClaim/kingdoms.yml`, autosaved on
 the interval configured in `config.yml` (`autosave-minutes`, default 5) and
 on server shutdown. `config.yml` also has `max-claims-per-kingdom` (default
-200) and `home-teleport-enabled` (default `true` — set `false` to disable
-`/kingdom home` server-wide; `/kingdom sethome` still works either way).
+200), `home-teleport-enabled` (default `true` — set `false` to disable
+`/kingdom home` server-wide; `/kingdom sethome` still works either way), and
+`claim-teleport-enabled` (default `true` — set `false` to disable teleporting
+to a claim by clicking it in the claims GUI).
